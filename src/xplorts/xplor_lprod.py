@@ -1,95 +1,102 @@
 #!/usr/bin/env python
 # coding: utf-8
+"""
+xplor_lprod
+-----------
+Make standalone interactive charts for time series productivity data.
 
-# In[11]:
+Can be imported as a module, or run from the command line as a Python script.
 
+When run from the command line, `xplor_lprod.py` reads data from a CSV file and
+creates an HTML document that displays time series levels and cumulative
+growth components for one level of a split factor at a time, as well as 
+a snapshot of growth components across all levels of the split factor for
+one time period.
+      
+    In the CSV file, the first row of data defines column names.  
+    The file should include:
+        - a column of dates (annual, quarterly or monthly), 
+        - a column of category names, and 
+        - one or more columns of data values to be plotted against dates.  
 
-from bokeh.layouts import column, gridplot, layout
-from bokeh.models import CustomJSHover, FactorRange, HoverTool
+    An interactive chart is created, with widgets to select one of the
+    category names (from a pulldown list or a slider).  The chart shows
+    one line for each value column, with dates plotted along the horizontal
+    axis.
+    
+    The interactive chart is saved as an HTML file which requires 
+    a web browser to view, but does not need an active internet connection.  
+    Once created, the HTML file does not require Python,
+    so it is easy to share the interactive chart.
+
+Command line interface
+----------------------
+usage: xplor_lprod.py [-h] [-b BY] [-d DATE] [-p LPROD] [-v GVA] [-l LABOUR]
+                      [-g ARGS] [-t SAVE] [-s]
+                      datafile
+
+Create interactive visualiser for labour productivity levels with a split
+factor
+
+positional arguments:
+  datafile              File (CSV) with data series and split factor
+
+optional arguments:
+  -h, --help            Show this help message and exit
+  -b BY, --by BY        Factor variable for splits
+  -d DATE, --date DATE  Date variable
+  -p LPROD, --lprod LPROD
+                        Productivity variable
+  -v GVA, --gva GVA     Gross value added (GVA) variable
+  -l LABOUR, --labour LABOUR
+                        Labour variable (e.g. jobs or hours worked)
+  -g ARGS, --args ARGS  Keyword arguments.  YAML mapping of mappings.  The
+                        keys 'lines', 'growth_series' and 'growth_snapshot' 
+                        can provide keyword arguments to pass to
+                        `prod_ts_lines`, `prod_ts_growth` and 
+                        `prod_growth_snapshot`, respectively.
+  -t SAVE, --save SAVE  Interactive .html to save, if different from the
+                        datafile base
+  -s, --show            Show interactive .html
+  
+
+Application program interface (API)
+-----------------------------------
+prod_growth_snapshot
+    Make categorical snapshot chart of productivity growth components.
+
+prod_ts_growth
+    Make time series chart of productivity growth components.
+
+prod_ts_lines
+    Make line chart of productivity data.
+"""
+
+#%%
+# Bokeh imports.
+from bokeh.layouts import column, layout
 from bokeh.models.widgets import Div
-from bokeh.plotting import figure
-from bokeh.io import output_file, show
+from bokeh.io import show
 from bokeh import palettes
 
+# Other external imports.
 import argparse
 from collections import defaultdict
 import pandas as pd
 from pathlib import Path
 import textwrap
-import re
 import yaml
 
-from base import (date_tuples, factor_view, filter_widget, growth_vars, iv_dv_figure, 
-                  link_widgets_to_groupfilters, set_output_file, unpack_data_varnames, 
+# Internal imports.
+from base import (date_tuples, filter_widget, growth_vars, iv_dv_figure, 
+                  set_output_file, unpack_data_varnames, 
                   variables_cmap)
 from lines import grouped_multi_lines, link_widget_to_lines
 from slideselect import SlideSelect
-from stacks import grouped_stack
 from snapcomp  import components_figure, link_widget_to_snapcomp_figure
 from tscomp import link_widget_to_tscomp_figure, ts_components_figure
 
-
-# In[2]:
-
-
-def index_to(data, baseline, to=100):
-    """
-    Scale data so values at `baseline` map to `to`
-    
-    Examples
-    --------
-    # Index (2001 = 100)
-    df = pd.DataFrame(dict(year=[2000, 2001, 2002], jobs=[40, 50, 20]))
-    baseline = df.jobs[df.year == 2001].values[0]
-    df["jobs_index"] = index_to(df.jobs, baseline)
-    df
-    #    year  jobs  jobs_index
-    # 0  2000    40        80.0
-    # 1  2001    50       100.0
-    # 2  2002    20        40.0
-    """
-    
-    return data / baseline * to
-
-def growth_pct_from(data, baseline):
-    """
-    Percentage growth from baseline data
-    
-    ## Year on year growth
-    df = pd.DataFrame(dict(year=[2000, 2001, 2002], jobs=[40, 50, 20]))
-    baseline = df.jobs[df.year == 2001].values[0]
-    df["jobs_yoy"] = growth_pct_from(df, baseline)
-    
-    ## Cumulative growth for two columns
-    df = pd.DataFrame(dict(
-        year=[2000, 2001, 2002], 
-        jobs=[40, 50, 20], 
-        gva=[200, 250, 275]))
-    baseline = df.loc[df.year == df.year.min(), ("jobs", "gva")].reindex(index=df.index, method="nearest")
-    df[["jobs_growth", "gva_growth"]] = growth_pct_from(df[["jobs", "gva"]], baseline)
-    df
-    """
-    
-    return (data / baseline - 1) * 100
-
-
-def _cumulative_growth(data, columns, date_var="date"):
-    # Wrap single column name in a list, for convenience.
-    columns = [columns] if isinstance(columns, str) else columns
-    
-    # Classify each row as having the earliest date or not.
-    is_min_date = data[date_var] == data[date_var].min()
-    
-    # Calculate baseline for each column from row with earliest date.
-    return growth_pct_from(data[columns], date_var="date",
-                           baseline="first")
-
-def _window_growth():
-    pass
-
-
-# In[ ]:
-
+#%%
 
 def _parse_args():
     """
@@ -129,7 +136,11 @@ def _parse_args():
                         help="Labour variable (e.g. jobs or hours worked)")
     parser.add_argument("-g", "--args", 
                         type=str,
-                        help="Keyword arguments(?)")
+                        help="""Keyword arguments.  YAML mapping of mappings.  The
+                            keys 'lines', 'growth_series' and 'growth_snapshot' 
+                            can provide keyword arguments to pass to
+                            `prod_ts_lines`, `prod_ts_growth` and 
+                            `prod_growth_snapshot`, respectively.""")
 
     parser.add_argument("-t", "--save", type=str, 
                         help="Interactive .html to save, if different from the datafile base")
@@ -219,7 +230,7 @@ def prod_ts_lines(data,
 
     # Prepare to suppress most quarters or months on axis if lots of them.
     suppress_factors = (isinstance(data_local["_date_factor"][0], tuple)
-                        and len(data_local["_date_factor"].unique()) > 40)
+                        and len(data_local["_date_factor"].unique()) > DATE_THRESHOLD)
     
     ## Show index time series on line chart, split by industry.
     fig_index_lines = iv_dv_figure(
@@ -324,7 +335,7 @@ def prod_ts_growth(data,
 
     # Prepare to suppress most quarters or months on axis if lots of them.
     suppress_factors = (isinstance(data_local["_date_factor"][0], tuple)
-                        and len(data_local["_date_factor"].unique()) > 40)
+                        and len(data_local["_date_factor"].unique()) > DATE_THRESHOLD)
     
     # Reverse sign of denominator variable (into new dataframe).
     labour_reversed = labour + reverse_suffix
@@ -461,8 +472,7 @@ def prod_growth_snapshot(data,
     return fig_snapshot
 
 
-# In[ ]:
-
+#%%
 
 if __name__ == "__main__":
     # Running from command line (or in Notebook?).
@@ -471,7 +481,6 @@ if __name__ == "__main__":
     DATE_THRESHOLD = 40
     
     args = _parse_args()
-    print(args)
 
     # Read the data as is.
     data = pd.read_csv(args.datafile, dtype=str)
@@ -485,7 +494,6 @@ if __name__ == "__main__":
     datevar = varnames["date"]
     dependent_variables = [varnames[var] for var in ("lprod", "gva", "labour")]
     
-    #title = ", ".join(dependent_variables) + " by " + varnames["by"]
     title = "xplor lprod: " + Path(args.datafile).stem
     
     # Configure output file for interactive html.

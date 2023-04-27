@@ -1,106 +1,82 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# In[1]:
-
-
 """
-Make standalone interactive scatter chart with split factor
+Make standalone interactive marker charts for categorical data.
 
-When imported as a module, the function `grouped_scatter()` is
-defined.
+Can be imported as a module, or run from the command line as a Python script.
 
-When run from the command line, `scatter` reads data from a `csv` file
-and creates an interactive chart.
+When imported as a module, the function `grouped_scatter()` is defined.
 
-The `scatter` command reads data from a `csv` file.  The first row 
-of data defines column names.  The file should include:
-    - a column of independent variable categories, 
-    - a column of category names for a split factor, and 
-    - one or more columns of data values to be plotted as markers
-      against the independent variable.  
+When run from the command line, `scatter.py` reads data from a `csv` file and
+creates an HTML document that displays an interactive line chart.
+    
+    In the `csv` file, the first row of data defines column names.  
+    The file should include:
+        - a column of independent variable categories, 
+        - a column of category names for a split factor, and 
+        - one or more columns of data values to be plotted as markers
+          against the independent variable.  
+    
+    An interactive chart is created, with widgets to select one of the split
+    factor category names (from a pulldown list or a slider), and a chart with
+    one series of markers for each value column.  The independent variable is
+    plotted against either the x or y axis.
 
-An interactive chart is created, with widgets to select one of the
-factor category names (from a pulldown list or a slider), and a chart with
-one series of markers for each value column.  The independent variable is
-plotted against either the x or y axis.
-
-The interactive chart can be viewed immediately in a web browser or can
-be saved as a standalone `html` file.  The interactive `html` file requires 
-a web browser to view, but does not need an active internet connection and 
-can be viewed offline.  Once created, the `html` file does not require Python,
-so it is easy to share the interactive chart.
 
 Command line interface
 ----------------------
-usage: stacks.py [-h] [-b BY] [-x DATEVAR] [-y BARS [BARS ...]] [-g ARGS]
-                 [-p PALETTE] [-t SAVE | -T] [-s]
-                 datafile
+usage: scatter.py [-h] [-b BY] [-x X | -y Y] [-m MARKER]
+                  [-v VALUES [VALUES ...]] [-g ARGS] [-t SAVE] [-s]
+                  datafile
 
-Create interactive stacked bars for data series with a split factor
+Create interactive scatter plot for data series with a split factor
 
 positional arguments:
-  datafile              Name of .csv file with data series and split factor
+  datafile              File (CSV) with data series and split factor
 
 optional arguments:
   -h, --help            show this help message and exit
-  -b BY, --by BY        Name of factor variable for splits
-  -x X                  Name of independent variable, for horizontal axis
-  -y Y                  Name of independent variable, for vertical axis
+  -b BY, --by BY        Factor variable for splits
+  -x X                  Independent variable, for horizontal axis
+  -y Y                  Independent variable, for vertical axis
+  -m MARKER, --marker MARKER
+                        Shape to use for markers. Passed to Bokeh
+                        `Figure.scatter()`.
   -v VALUES [VALUES ...], --values VALUES [VALUES ...]
                         Dependent variables to plot against independent
                         variable
-  -g ARGS, --args ARGS  Keyword arguments for grouped_stack()
+  -g ARGS, --args ARGS  Keyword arguments for grouped_stack(), specified as
+                        YAML mapping
   -t SAVE, --save SAVE  Name of interactive .html to save, if different from
                         the datafile base
   -s, --show            Show interactive .html
 
+
 Application program interface (API)
 -----------------------------------
-grouped_scatter(fig, iv_axis="x", iv_variable=None, marker_variable=None, marker="circle", 
-                color_map={}, tooltips=[], **kwargs)
-    Add a scatter plot to a figure, with legend entry and hover tooltip
+grouped_scatter
+    Add a scatter plot to a figure, with legend entry and hover tooltip.
 """
 
-## For command line interface, be sure to activate the relevant conda environment
-# On Windows (see LProd system on how to do it all in one command):
-#  activate python36_plus_hv2
-# On Mac:
-#   conda activate python36_plus_hv2
-None
+#%%
 
-
-# In[2]:
-
-
-from bokeh import palettes
-from bokeh.core.properties import expr
-from bokeh.io import output_file, save, show
-from bokeh.layouts import gridplot, layout
-from bokeh.models import (CDSView, ColumnDataSource, CustomJS, CustomJSExpr,
-                          CustomJSFilter, CustomJSTransform, 
-                          FactorRange, GroupFilter, HoverTool,
-                          Legend, LegendItem, Select)
-from bokeh.plotting import figure
-from bokeh.transform import factor_cmap, factor_mark
+from bokeh.io import save, show
+from bokeh.layouts import layout
+from bokeh.models import ColumnDataSource
+from bokeh.models.widgets import Div
 
 import argparse
-from itertools import repeat
-import numpy as np
 import pandas as pd
-from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pathlib import Path
-import re
 import yaml
 
 ## Imports from this package
-from base import (add_hover_tool, extend_legend_items, factor_view, GhostBokeh, iv_dv_figure, 
-                  link_widgets_to_groupfilters, variables_cmap)
+from base import (add_hover_tool, extend_legend_items, factor_view, 
+                  filter_widget, iv_dv_figure, 
+                  link_widgets_to_groupfilters, set_output_file, variables_cmap)
 from slideselect import SlideSelect
 
-
-# In[5]:
-
+#%%
 
 def grouped_scatter(
     fig,
@@ -130,7 +106,7 @@ def grouped_scatter(
     tooltips : list
         Optional additional tooltips.
     kwargs : mapping
-        Passed to `bokeh.plotting.figure()`.  Should normally map "source" to a
+        Passed to `bokeh.plotting.figure.scatter()`.  Should normally map "source" to a
         `ColumnDataSource` and "view" to a `GroupView` object to achieve a chart
         that shows one level of a split factor at a time.
         
@@ -240,15 +216,18 @@ def _parse_args():
         description="Create interactive scatter plot for data series with a split factor"
     )
     parser.add_argument("datafile", 
-                        help="Name of .csv file with data series and split factor")
+                        help="File (CSV) with data series and split factor")
     parser.add_argument("-b", "--by", type=str,
-                        help="Name of factor variable for splits")
+                        help="Factor variable for splits")
 
     iv_group = parser.add_mutually_exclusive_group()
     iv_group.add_argument("-x", type=str,
-                          help="Name of independent variable, for horizontal axis")
+                          help="Independent variable, for horizontal axis")
     iv_group.add_argument("-y", type=str,
-                          help="Name of independent variable, for vertical axis")
+                          help="Independent variable, for vertical axis")
+
+    parser.add_argument("-m", "--marker", type=str,
+                        help="Shape to use for markers.  Passed to Bokeh `Figure.scatter()`.")
 
     parser.add_argument("-v", "--values", 
                         nargs="+", type=str,
@@ -256,7 +235,7 @@ def _parse_args():
     
     parser.add_argument("-g", "--args", 
                         type=str,
-                        help="Keyword arguments for grouped_stack()")
+                        help="Keyword arguments for grouped_scatter(), specified as YAML mapping")
 
     parser.add_argument("-t", "--save", type=str, 
                         help="Name of interactive .html to save, if different from the datafile base")
@@ -269,11 +248,12 @@ def _parse_args():
     args.args = {} if args.args is None else yaml.safe_load(args.args)
     return(args)
 
-
-# In[ ]:
-
-
-if __name__ == "__main__":
+#%%
+def main():
+    """
+    Parse command line arguments and make a scatter chart
+    """
+    
     args = _parse_args()
 
     data = pd.read_csv(args.datafile, dtype=str)
@@ -294,18 +274,20 @@ if __name__ == "__main__":
         else:
             iv_axis = "y"
             iv_variable = args.y
+            
+    marker = args.marker or "circle"
+    
+    title = "scatter: " + Path(args.datafile).stem
+    
+    # Configure output file for interactive html.
+    set_output_file(
+        args.save or args.datafile,
+        title = title
+    )
     
     # Convert str to float so we can plot the data.
     data[datavars] = data[datavars].astype(float)
     
-    # Configure output file for interactive html.
-    outfile = args.save
-    if outfile is None:
-        # Use datafile name, with .html extension.
-        outfile = Path(args.datafile).with_suffix(".html").as_posix()
-    title = ", ".join(datavars) + " by " + byvar
-    output_file(outfile, title=title, mode='inline')
-
     # Make a slide-select widget to choose factor level.
     widget = SlideSelect(options=list(data[byvar].unique()),
                          name=byvar + "_select")
@@ -320,8 +302,12 @@ if __name__ == "__main__":
     default_color_map = variables_cmap(datavars,
                                        "Category10_10")
 
+    # Labels for axis.
+    iv_data = data[iv_variable].unique()
+    iv_data = reversed(iv_data) if iv_axis == "y" else list(iv_data)
+
     fig = iv_dv_figure(
-        iv_data = source.data[iv_variable],
+        iv_data = iv_data,
         iv_axis = iv_axis,
     )
 
@@ -332,6 +318,7 @@ if __name__ == "__main__":
             iv_axis=iv_axis,
             iv_variable=iv_variable,
             marker_variable=var,
+            marker=marker,
             source=source,
             view=view_by_factor,
             color=default_color_map[var],
@@ -339,6 +326,7 @@ if __name__ == "__main__":
     
     # Make app that shows widget and chart.
     app = layout([
+        Div(text="<h1>" + title),  # Show title as level 1 heading.
         [widget],
         [fig]
     ])
@@ -348,10 +336,12 @@ if __name__ == "__main__":
     else:
         save(app)  # Save file.
 
+    
+if __name__ == "__main__":
+    main()
 
-# In[ ]:
-
-
+#%% Move to test
+    
 if False:
     df_data = pd.DataFrame([
         (2001, 'A', 100, 100),

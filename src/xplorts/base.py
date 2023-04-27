@@ -1,8 +1,40 @@
-#!/usr/bin/env python
-# coding: utf-8
+"""
+Base
+----
+Miscellaneous helpers for interactive time series charts
 
-# In[1]:
+Functions
+---------
+accumulate_list
+    Initial subsequences of increasing length from list of items.
 
+date_tuples
+
+dict_fill
+
+growth_pct_from
+    Percentage growth for a series relative to a baseline value.
+
+index_to
+    Scale a series by constant so a baseline value maps to a target value.
+
+growth_vars
+unpack_data_varnames
+variables_cmap
+
+add_hover_tool
+extend_legend_items
+factor_filters
+factor_view
+filter_widget
+iv_dv_figure
+link_widgets_to_groupfilters
+set_output_file
+
+"""
+
+
+#%%
 
 from bokeh import palettes
 import bokeh.palettes
@@ -13,7 +45,7 @@ from bokeh.models import (CDSView, ColumnDataSource, CustomJS, GroupFilter, Fact
 from bokeh.models.formatters import FuncTickFormatter
 from bokeh.plotting import figure
 
-from itertools import cycle
+from itertools import cycle, tee
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pathlib import Path
 
@@ -22,11 +54,46 @@ import pandas as pd
 import re
 
 # Imports from this package.
-from ghostbokeh import GhostBokeh
 from slideselect import SlideSelect
 
+try:
+    from itertools import pairwise
+except ImportError:
+    # Define local pairwise(), since itertools is too old to have it.
+    #
+    # Function is derived from
+    #   https://docs.python.org/3/library/itertools.html#itertools.pairwise
+    # "Copyright © 2001-2023 Python Software Foundation; All Rights Reserved"
+    # Used here under the ZERO-CLAUSE BSD LICENSE FOR CODE IN THE PYTHON 3.11.3 DOCUMENTATION
+    #   https://docs.python.org/3/license.html#bsd0
+    def pairwise(iterable):
+        """
+        Stand-in for itertools.pairwise()
+        
+        pairwise('ABCDEFG') --> AB BC CD DE EF FG.
+        """
+        
+        a, b = tee(iterable)
+        next(b, None)  # Remove first item of second sequence.
+        return zip(a, b)  # Pairs until second sequence is exhausted.
 
-# In[80]:
+
+#%%
+
+def accumulate_list(items):
+    """
+    Initial subsequences of increasing length from list of items
+    
+    Generator of lists.
+    
+    Examples
+    --------
+    gen = accumulate_list([1, 2])
+    list(gen)
+    # [[], [1], [1, 2]]
+    """
+    for i in range(len(items) + 1):
+        yield items[:i]
 
 
 def index_to(data, baseline, to=100):
@@ -170,51 +237,6 @@ def growth_vars(data, columns=[], date_var=None, by=None,
         else:
             sorted_data = data[columns].sort_values(date_var)
         result[columns] = 100 * sorted_data.pct_change(periods=periods)
-    return result
-
-
-def zz_growth_vars(data, columns=[], reverse=[], by=None, 
-                suffix="", reverse_suffix="",
-                method="total", date_var="date"):
-    
-    # Make result dataframe with columns for date_var and by.
-    result = data[[date_var] + ([] if by is None else [by])].copy()
-    
-    if method == "total":
-        if by is None:
-            # Each column is a single time series with no splits.
-            growth = _cumulative_growth(data, columns=columns, date_var=date_var)
-        else:
-            # Calculate growth for each split group.
-            growth = data.groupby(by)                 .apply(_cumulative_growth, columns=columns, date_var=date_var)
-    else:
-        raise NotImplemented(f"Method {method} not implemented")
-
-    # Put growth into result dataframe.
-    result[columns] = growth
-
-    # Wrap single reverse column name in list, for convenience.
-    reverse = [reverse] if isinstance(reverse, str) else reverse
-    if len(reverse):
-        # Reverse sign of growth for specified variables.
-        result[reverse] *= -1
-
-    if len(suffix):
-        # Append suffix to column names.
-        result.rename(
-            inplace=True,
-            columns={
-                name: name + suffix for name in columns
-            })
-    
-    if len(reverse_suffix):
-        # Append reverse_suffix to names of columns with sign-reversed data.
-        result.rename(
-            inplace=True,
-            columns={
-                name + suffix: name + suffix + reverse_suffix for name in reverse
-            })
-
     return result
 
 
@@ -671,6 +693,9 @@ def unpack_data_varnames(args, arg_names, defaults=None):
         and all(arg is None for arg in mapping.values())):
         # Use default names.
         mapping = dict(zip(arg_names, defaults))
+        if len(defaults) > len(arg_names):
+            # Heap extra defaults into last key.
+            mapping[arg_names[-1]] = defaults[len(arg_names):]
     return mapping
 
 def date_tuples(dates, length_threshold = np.inf):

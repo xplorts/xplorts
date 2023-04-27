@@ -20,7 +20,7 @@ from bokeh.layouts import column, row
 from bokeh.io import show
 #from bokeh.plotting import show
 
-from base import GhostBokeh
+from ghostbokeh import GhostBokeh
 
 
 # In[ ]:

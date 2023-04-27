@@ -1,36 +1,89 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# In[ ]:
-
-
 """
-Interactive chart showing snapshot components and total by split category
+Make standalone interactive chart showing snapshot components and total.
+
+Can be imported as a module, or run from the command line as a Python script.
+
+When run from the command line, `snapcomp.py` reads data from a CSV file and
+creates an HTML document that displays snapshot
+components for one level of a split factor at a time.
+      
+    In the CSV file, the first row of data defines column names.  
+    The file should include:
+        - a column of category names for the vertical chart axis, 
+        - a column of category names for the split factor
+        - a column of data totals at each level along the vertical axis, and 
+        - one or more columns of value components for each total.
+
+    An interactive chart is created, with widgets to select one of the
+    split factor levels (from a pulldown list or a slider).  The chart plots
+    value components as stacked bars with a marker for each total.
+    
+    The interactive chart is saved as an HTML file which requires 
+    a web browser to view, but does not need an active internet connection.  
+    Once created, the HTML file does not require Python,
+    so it is easy to share the interactive chart.
+
+Command line interface
+----------------------
+usage: snapcomp.py [-h] [-b BY] [-y IV] [-m MARKERS] [-x BARS [BARS ...]] [-L]
+                   [-g ARGS] [-t SAVE] [-s]
+                   datafile
+
+Create interactive horizontal bar chart for snapshot components with a split
+factor
+
+positional arguments:
+  datafile              File (CSV) with data series and split factor
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -b BY, --by BY        Factor variable for splits
+  -y IV, --iv IV        Name of independent categorical variable for vertical
+                        axis
+  -m MARKERS, --markers MARKERS
+                        Variable to show as marker points
+  -x BARS [BARS ...], --bars BARS [BARS ...]
+                        Variables to show as horizontal stacked bars
+  -L, --last            Initial chart shows last level of `by` variable
+  -g ARGS, --args ARGS  Keyword arguments. YAML mapping of mappings. The keys
+                        'lines' and 'bars' can provide keyword arguments to
+                        pass to `components_figure()`.
+  -t SAVE, --save SAVE  Interactive .html to save, if different from the
+                        datafile base
+  -s, --show            Show interactive .html
+
+
+Application program interface (API)
+-----------------------------------
+components_figure
+    Interactive chart showing snapshot components and total by split group
+
+link_widget_to_snapcomp_figure
+    Link a select widget to components to show one level of split group
 """
 
+#%%
 
-# In[1]:
-
-
-from bokeh.layouts import gridplot, layout
-from bokeh.io import output_file, save, show
+from bokeh.layouts import layout
+from bokeh.io import save, show
 from bokeh.models import ColumnDataSource
+from bokeh.models.widgets import Div
 from bokeh import palettes
 
 import argparse
 from pathlib import Path
 import pandas as pd
-import re
 import yaml
 
-from base import add_hover_tool, factor_view, iv_dv_figure, link_widgets_to_groupfilters, variables_cmap
+from base import (add_hover_tool, factor_view, iv_dv_figure, filter_widget, 
+                  link_widgets_to_groupfilters, set_output_file, 
+                  unpack_data_varnames, variables_cmap)
 from scatter import grouped_scatter
-from slideselect import SlideSelect
 from stacks import grouped_stack
 
-
-# In[ ]:
-
+#%%
 
 def components_figure(
     fig,
@@ -113,9 +166,7 @@ def components_figure(
 
     return [markers] + bars
 
-
-# In[ ]:
-
+#%%
 
 def link_widget_to_snapcomp_figure(widget, fig=None, renderers=None):
     if renderers is None:
@@ -130,13 +181,12 @@ def link_widget_to_snapcomp_figure(widget, fig=None, renderers=None):
     for cds_filter in sample.view.filters:
         # Sync filter to widget.
         cds_filter.group = widget.value
+    # Sync groupfilters to widget (for multi-lines?).
     link_widgets_to_groupfilters(widget,
                                  source=sample.data_source, 
                                  view=sample.view)
 
-
-# In[ ]:
-
+#%%
 
 def _parse_args():
     """
@@ -160,27 +210,31 @@ def _parse_args():
         description="Create interactive horizontal bar chart for snapshot components with a split factor"
     )
     parser.add_argument("datafile", 
-                        help="Name of .csv file with data series and split factor")
+                        help="File (CSV) with data series and split factor")
     parser.add_argument("-b", "--by", type=str,
-                        help="Name of factor variable for splits")
+                        help="Factor variable for splits")
 
     parser.add_argument("-y", "--iv", type=str,
-                        help="Name of independent variable on vertical axis")
+                        help="Name of independent categorical variable for vertical axis")
 
     parser.add_argument("-m", "--markers", type=str,
                         help="Variable to show as marker points")
     parser.add_argument("-x", "--bars", 
                         nargs="+", type=str,
                         help="Variables to show as horizontal stacked bars")
-    parser.add_argument("-g", "--args", 
-                        type=str,
-                        help="Keyword arguments for components_figure()")
 
     parser.add_argument("-L", "--last", action="store_true", 
                         help="Initial chart shows last level of `by` variable")
 
+    parser.add_argument("-g", "--args", 
+                        type=str,
+                        help="""Keyword arguments.  YAML mapping of mappings.  The
+                            keys 'lines' and 'bars' 
+                            can provide keyword arguments to pass to
+                            `components_figure()`.""")
+
     parser.add_argument("-t", "--save", type=str, 
-                        help="Name of interactive .html to save, if different from the datafile base")
+                        help="Interactive .html to save, if different from the datafile base")
 
     parser.add_argument("-s", "--show", action="store_true", 
                         help="Show interactive .html")
@@ -191,56 +245,43 @@ def _parse_args():
     args.args = {} if args.args is None else yaml.safe_load(args.args)
     return(args)
 
-
-# In[ ]:
-
+#%%
 
 if __name__ == "__main__":
-    # Running from command line (or in Notebook?).
-    
+    # Running from command line.    
     args = _parse_args()
-    print(args)
 
     data = pd.read_csv(args.datafile, dtype=str)
     
-    # Unpack args specifying which columns to use.
-    if all(getattr(args, arg) is None for arg in ["iv", "by", "markers", "bars"]):
-        # Get y from first column, byvar from second, markers from third, datavars from remaining.
-        y, byvar, linevar = data.columns[:3]
-        datavars = data.columns[3:]
-    else:
-        # Get byvar, linevar and datavars from explicit arguments, and optionally datevar too.
-        byvar = args.by
-        markervar = args.markers
-        datavars = args.bars
-        y = args.iv
-    
-    # Convert str to float so we can plot the data.
-    data[markervar] = data[markervar].astype(float)
+    title = "tscomp: " + Path(args.datafile).stem
     
     # Configure output file for interactive html.
-    outfile = args.save
-    if outfile is None:
-        # Use datafile name, with .html extension.
-        outfile = Path(args.datafile).with_suffix(".html").as_posix()
-    title = ", ".join(datavars) + " by " + byvar
-    output_file(outfile, title=title, mode='inline')
+    set_output_file(
+        args.save or args.datafile,
+        title = title
+    )
     
-    dependent_variables = datavars.copy()
+    # Unpack args specifying which data columns to use.
+    varnames = unpack_data_varnames(
+        args,
+        ["iv", "by", "markers", "bars"],
+        data.columns)
+    
+    # Make list of dependent variables for bars plus markers, if any.
+    markervar = varnames["markers"]
+    dependent_variables = varnames["bars"].copy()
     if markervar is not None:
         dependent_variables.insert(0, markervar)
+    
+    # Convert str to float so we can plot the data.
+    data[dependent_variables] = data[dependent_variables].astype(float)
 
     default_color_map = variables_cmap(dependent_variables[::-1],
                                        palettes.Category20_20)
-    default_bar_colors = [default_color_map[var] for var in datavars]
-    
-    # Make a slide-select widget to choose factor level.
-    widget = SlideSelect(options=list(data[byvar].unique()),
-                         title=byvar,  # Shown.
-                         name=byvar + "_select")
+    default_bar_colors = [default_color_map[var] for var in varnames["bars"]]
 
     fig = iv_dv_figure(
-        iv_data = data[y].unique(),
+        iv_data = reversed(data[varnames["iv"]].unique()),
         iv_axis = "y",
     )
     
@@ -261,20 +302,24 @@ if __name__ == "__main__":
     renderers = components_figure(
         fig,
         data,
-        by=byvar,
-        marker_variable=markervar,
-        y=y,
-        bar_variables=datavars,
+        by=varnames["by"],
+        marker_variable=varnames["markers"],
+        y=varnames["iv"],
+        bar_variables=varnames["bars"],
         scatter_args=scatter_args,
         bar_args=bar_args,
         **args.args)
 
+    # Widget for `by`.
+    byvar = varnames["by"]
+    widget = filter_widget(data[byvar], title=byvar)
     if args.last:
         widget.value = widget.options[-1]
     link_widget_to_snapcomp_figure(widget, fig)
 
     # Make app that shows widget and chart.
     app = layout([
+        Div(text="<h1>" + title),  # Show title as level 1 heading.
         [widget],
         [fig]
     ])
@@ -283,4 +328,3 @@ if __name__ == "__main__":
         show(app)  # Save file and display in web browser.
     else:
         save(app)  # Save file.
-

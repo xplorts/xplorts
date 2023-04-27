@@ -1,37 +1,89 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# In[ ]:
-
-
 """
-Interactive chart showing time series components and total by split category
+tscomp
+------
+Make standalone interactive chart showing time series components and total.
+
+Can be imported as a module, or run from the command line as a Python script.
+
+When run from the command line, `tscomp.py` reads data from a CSV file and
+creates an HTML document that displays time series
+growth components for one level of a split factor at a time.
+      
+    In the CSV file, the first row of data defines column names.  
+    The file should include:
+        - a column of dates (annual, quarterly or monthly), 
+        - a column of category names for the split factor,
+        - a column of data values for totals at each date, and 
+        - one or more columns of growth components at each date.  
+
+    An interactive chart is created, with widgets to select one of the
+    category names (from a pulldown list or a slider).  The chart plots
+    dates along the horizontal axis, with growth components shown as stacked
+    bars and totals shown as a time series line.
+    
+    The interactive chart is saved as an HTML file which requires 
+    a web browser to view, but does not need an active internet connection.  
+    Once created, the HTML file does not require Python,
+    so it is easy to share the interactive chart.
+
+Command line interface
+----------------------
+usage: tscomp.py [-h] [-b BY] [-d DATE] [-l LINE] [-y BARS [BARS ...]]
+                 [-g ARGS] [-t SAVE] [-s]
+                 datafile
+
+Create interactive time series chart for growth components with a split factor
+
+positional arguments:
+  datafile              File (CSV) with data series and split factor
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -b BY, --by BY        Factor variable for splits
+  -d DATE, --date DATE  Date variable
+  -l LINE, --line LINE  Variable to show as time series line
+  -y BARS [BARS ...], --bars BARS [BARS ...]
+                        Variables to show as stacked bars
+  -g ARGS, --args ARGS  Keyword arguments. YAML mapping of mappings. The keys
+                        'lines' and 'bars' can provide keyword arguments to
+                        pass to `ts_components_figure()`.
+  -t SAVE, --save SAVE  Interactive .html to save, if different from the
+                        datafile base
+  -s, --show            Show interactive .html
+
+
+Application program interface (API)
+-----------------------------------
+ts_components_figure
+    Interactive chart showing time series components and total by split group
+
+link_widget_to_tscomp_figure
+    Link a select widget to components series to show one level of split group
 """
 
-
-# In[3]:
-
-
-from bokeh.layouts import gridplot, layout
-from bokeh.io import output_file, save, show
+#%%
+from bokeh.layouts import layout
+from bokeh.io import save, show
 from bokeh.models import ColumnDataSource
+from bokeh.models.widgets import Div
 from bokeh import palettes
 
 import argparse
+from collections import defaultdict
 from pathlib import Path
 import pandas as pd
-import re
 import yaml
 
-from base import add_hover_tool, factor_view, iv_dv_figure, link_widgets_to_groupfilters, variables_cmap
+from base import (add_hover_tool, date_tuples, factor_view, filter_widget, 
+                  iv_dv_figure, link_widgets_to_groupfilters,
+                  set_output_file, unpack_data_varnames, 
+                  variables_cmap)
 from lines import grouped_multi_lines, link_widget_to_lines
-from slideselect import SlideSelect
 from stacks import grouped_stack
 
-
-# In[ ]:
-
-
+#%%
 def ts_components_figure(
     fig,
     data,
@@ -119,11 +171,11 @@ def ts_components_figure(
     
     return lines + bars
 
-
-# In[ ]:
-
-
+#%%
 def link_widget_to_tscomp_figure(widget, fig=None, lines=None, bars=None):
+    """
+    
+    """
     if lines is None:
         lines = fig._lines
     if bars is None:
@@ -135,9 +187,7 @@ def link_widget_to_tscomp_figure(widget, fig=None, lines=None, bars=None):
                                  source=source, 
                                  view=view)
 
-
-# In[ ]:
-
+#%%
 
 def _parse_args():
     """
@@ -158,15 +208,15 @@ def _parse_args():
     """
     # Check command line arguments.
     parser = argparse.ArgumentParser(
-        description="Create interactive time series chart for components with a split factor"
+        description="Create interactive time series chart for growth components with a split factor"
     )
     parser.add_argument("datafile", 
-                        help="Name of .csv file with data series and split factor")
+                        help="File (CSV) with data series and split factor")
     parser.add_argument("-b", "--by", type=str,
-                        help="Name of factor variable for splits")
+                        help="Factor variable for splits")
 
-    parser.add_argument("-x", "--datevar", type=str,
-                        help="Name of date variable")
+    parser.add_argument("-d", "--date", type=str,
+                        help="Date variable")
 
     parser.add_argument("-l", "--line", type=str,
                         help="Variable to show as time series line")
@@ -175,10 +225,13 @@ def _parse_args():
                         help="Variables to show as stacked bars")
     parser.add_argument("-g", "--args", 
                         type=str,
-                        help="Keyword arguments for ts_components_figure()")
+                        help="""Keyword arguments.  YAML mapping of mappings.  The
+                            keys 'lines' and 'bars' 
+                            can provide keyword arguments to pass to
+                            `ts_components_figure()`.""")
 
     parser.add_argument("-t", "--save", type=str, 
-                        help="Name of interactive .html to save, if different from the datafile base")
+                        help="Interactive .html to save, if different from the datafile base")
 
     parser.add_argument("-s", "--show", action="store_true", 
                         help="Show interactive .html")
@@ -186,89 +239,97 @@ def _parse_args():
     args = parser.parse_args()
 
     # Unpack YAML args into dict of keyword args for ts_components_figure().
+    # Will return an empty dict for keys not specified in --args option.
     args.args = {} if args.args is None else yaml.safe_load(args.args)
+    args.args = defaultdict(dict, args.args)
     return(args)
 
-
-# In[ ]:
-
+#%%
 
 if __name__ == "__main__":
-    # Running from command line (or in Notebook?).
+    # Running from command line.
+    
+    # Suppress quarterly or monthly axis labels for time series longer than this.
+    DATE_THRESHOLD = 40
     
     args = _parse_args()
-    print(args)
 
     data = pd.read_csv(args.datafile, dtype=str)
     
-    # Unpack args specifying which columns to use.
-    if all(getattr(args, arg) is None for arg in ["datevar", "by", "line", "bars"]):
-        # Get datevar from first column, byvar from second, line from third, datavars from remaining.
-        datevar, byvar, linevar = data.columns[:3]
-        datavars = data.columns[3:]
-    else:
-        # Get byvar, linevar and datavars from explicit arguments, and optionally datevar too.
-        byvar = args.by
-        linevar = args.line
-        datavars = args.bars
-        datevar = args.datevar or "date"
-    
-    # Configure output file for interactive html.
-    outfile = args.save
-    if outfile is None:
-        # Use datafile name, with .html extension.
-        outfile = Path(args.datafile).with_suffix(".html").as_posix()
-    title = ", ".join(datavars) + " by " + byvar
-    output_file(outfile, title=title, mode='inline')
-    
-    # Make a slide-select widget to choose factor level.
-    widget = SlideSelect(options=list(data[byvar].unique()),
-                         title=byvar,  # Shown.
-                         name=byvar + "_select")
-    
-    # Map variables to colors.
+    # Unpack args specifying which data columns to use.
+    varnames = unpack_data_varnames(
+        args,
+        ["date", "by", "line", "bars"],
+        data.columns)
+    datevar = varnames["date"]
+    datavars = varnames["bars"]
+    linevar = varnames["line"]
     dependent_variables = datavars.copy()
     if linevar is not None:
         dependent_variables.insert(0, linevar)
 
+    data_local = data.copy()
+    data_local["_date_factor"] = date_tuples(data_local[datevar],
+                                             length_threshold=DATE_THRESHOLD)
+
+    # Prepare to suppress most quarters or months on axis if lots of them.
+    suppress_factors = (isinstance(data_local["_date_factor"][0], tuple)
+                        and len(data_local["_date_factor"].unique()) > DATE_THRESHOLD)
+    
+    title = "tscomp: " + Path(args.datafile).stem
+    
+    # Configure output file for interactive html.
+    set_output_file(
+        args.save or args.datafile,
+        title = title
+    )
+
+    # Map variables to colors.
     default_color_map = variables_cmap(dependent_variables[::-1],
                                palettes.Category20_20)
     default_bar_colors = [default_color_map[var] for var in datavars]
 
     fig = iv_dv_figure(
-        iv_data = data[datevar].unique(),
+        iv_data = data_local["_date_factor"].unique(),
         iv_axis = "x",
-    )
+        suppress_factors = suppress_factors,
+        title = "Time series components and total",
+        #x_axis_label = kwargs.pop("x_axis_label", date),
+        #y_axis_label = kwargs.pop("y_axis_label", "Value"),
+   )
     
     if linevar is None:
         line_args = {}
     else:
-        # Use specified scatter_args, else defaults.
+        # Use specified line args, else defaults.
         line_args = args.args.pop(
-            "line_args",
+            "lines",
             {"color": default_color_map[linevar]})
         
-    # Use specified bar_args, else defaults.
+    # Use specified bar args, else defaults.
     bar_args = args.args.pop(
-        "bar_args",
+        "bars",
         {"color": default_bar_colors})
 
     # Make chart, and link widget to make one factor level visible.
     ts_components_figure(
         fig,
-        data,
-        by=byvar,
+        data_local,
+        by=varnames["by"],
         line_variable=linevar,
-        date_variable=datevar,
+        date_variable=dict(plot="_date_factor", hover=datevar),
         bar_variables=datavars,
         line_args=line_args,
         bar_args=bar_args,
         **args.args)
 
-    link_widget_to_components_figure(widget, fig)
+    # Widget for `by`.
+    widget = filter_widget(data[varnames["by"]], title=varnames["by"])
+    link_widget_to_tscomp_figure(widget, fig)
 
     # Make app that shows widget and chart.
     app = layout([
+        Div(text="<h1>" + title),  # Show title as level 1 heading.
         [widget],
         [fig]
     ])
