@@ -7,13 +7,25 @@ This module uses source code from Bokeh, with modification, to facilitate
 bidirectional stacked bars in which positive values stack "up" and negative
 values stack "down".
 
-Classes
--------
-
-
 Functions
 ---------
+double_stack
+    Generate sequence of dict describing margins of stacked values
 
+double_stack_updown
+    Generate sequence of dict describing parallel positive and negative stacks
+
+hbar_stack_updown
+    Make lists of renderers for bidirectionl horizontal stacked values
+
+stack_down
+    Create a StackDown expression for stacking negative components of fields
+
+stack_up
+    Create a StackDown expression for stacking positive components of fields
+    
+vbar_stack_updown
+    Make list of renderers for bidirectionl vertical stacked values
 """
 
 # Acknowledge Bokeh source and retain source code copyright notice.
@@ -54,12 +66,10 @@ THE POSSIBILITY OF SUCH DAMAGE.
 #%%
 
 from bokeh.core.properties import expr
-from bokeh.models import CustomJSExpr
 
 ## Imports from this package
-from base import (accumulate_list, pairwise)
-from ghostbokeh import GhostBokeh
-from stacks_util import StackDown, StackRectified, StackUp
+from dutils import accumulate_list, pairwise
+from stacks_util import StackDown, StackUp
 
 #%%
 

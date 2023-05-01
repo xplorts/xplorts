@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 """
-Save CSV with quarterly OPH CVM index by industryi division, with GVA and hours index series
+Save CSV with quarterly OPH CVM index by industry division, with GVA and hours index series
 
 Can be imported as a module, or run from the command line as a Python script.
 

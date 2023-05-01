@@ -88,9 +88,10 @@ import textwrap
 import yaml
 
 # Internal imports.
-from base import (date_tuples, filter_widget, growth_vars, iv_dv_figure, 
+from base import (filter_widget, iv_dv_figure, 
                   set_output_file, unpack_data_varnames, 
                   variables_cmap)
+from dutils import date_tuples, growth_vars
 from lines import grouped_multi_lines, link_widget_to_lines
 from slideselect import SlideSelect
 from snapcomp  import components_figure, link_widget_to_snapcomp_figure
