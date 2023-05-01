@@ -1,30 +1,32 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 """
 Combined select and slider widget with support for javascript linking
 
-To do
------
-Allow options from dict
+Classes
+-------
+SlideSelect
+    Combined select and slider widget with support for javascript linking
 
-Suppress hover display on slider
+Functions
+---------
+flexi_method
+    Return an instance method for a container or its first child
 """
 
+# =============================================================================
+# To do
+# Allow options from dict
+#
+# Suppress hover display on slider
+# 
+# =============================================================================
 
 from bokeh.models import Column, CustomJS, Div, Select, Slider
 from bokeh.layouts import column, row
 from bokeh.io import show
-#from bokeh.plotting import show
 
 from ghostbokeh import GhostBokeh
 
-
-# In[ ]:
-
+#%%
 
 class SlideSelect(GhostBokeh, Column):
     """
@@ -33,23 +35,25 @@ class SlideSelect(GhostBokeh, Column):
     Includes support for options that are strings, or dictionaries
     that map to strings.
     
-    Examples (?)
-    --------
-    msel = LinkableSelect(name="Measure", options={"one": "OK", "two": "NOK"})
-    result = pn.widgets.StaticText(value='?', width=50, align='center')
+    This class helps to create interactive objects with Bokeh, but does not
+    sync with those objects after they go live in a browser.
     
-    msel.jscallback(value=f'''
-        {msel.js_value_str}
-        result.text = Measure_value
-    ''', args={'result': result,
-               'Measure': msel})
-
-
+    Properties
+    -------
+    handle
+        An object that can be linked to Javascript for interactively
+        responding to changes in the selected value. Read-only.
+    
+    options: list
+        List of select options.  Read-only.
+    
+    value: str
+        Selected value.  Read/write.  Does not sync with the widget after it
+        goes live in a browser.
     """
 
     #_js_option_array = None
 
-    
     def __new__(cls, options, *args, title="Selection", **kwargs):
         option_keys = (
             list(options.keys()) if isinstance(options, dict)
@@ -91,11 +95,16 @@ class SlideSelect(GhostBokeh, Column):
     
     def __init__(self, options, *args, **kwargs):
         """
+        Creates a subclass of Bokeh Column that contains a drop-down select
+        widget and a slider widget for a common set of options.
         
         Parameters
         ----------
         options : dict, or iterable
-        
+            Options to be assigned to the browser-side `_js_option_array`.
+            
+        args, kwargs
+            Other other arguments are used by `__new__`.
         """
         option_values = (
             list(options.values()) if isinstance(options, dict)
@@ -130,10 +139,17 @@ class SlideSelect(GhostBokeh, Column):
 
     @property
     def options(self):
+        """
+        List of options available for selection.
+        """
         return self.handle.options
     
     @property
     def value(self):
+        """
+        Selected value.  Read/write.  Does not sync with the widget after it
+        goes live in a browser.
+        """
         return self.handle.value
     
     @value.setter
@@ -187,10 +203,9 @@ for method_name in js_methods:
     setattr(SlideSelect, method_name, flexi_method(method_name))
 
 
-# In[ ]:
+#%% Move to test?
 
-
-if __name__ == "__main__":
+if False:
     ss = SlideSelect(options=["a", "b", "c"])
     
     result = Div(
@@ -205,10 +220,5 @@ if __name__ == "__main__":
     show(row(ss, result))
 
 
-
-# In[ ]:
-
-
-if __name__ == "__main__":
     get_ipython().magic('pinfo ss.js_on_change')
 

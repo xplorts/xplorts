@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
 """
 Low level utilities for bidirectional stacked bars
 

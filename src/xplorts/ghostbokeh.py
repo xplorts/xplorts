@@ -1,8 +1,13 @@
-#!/usr/bin/env python
-# coding: utf-8
+"""
+ghostbokeh
+----------
+Defines a mixin to build a subclass of a Bokeh class
 
-# In[ ]:
-
+Classes
+-------
+GhostBokeh
+    Abstract base class mixin to build pseudo-subclass of a Bokeh class
+"""
 
 class GhostBokeh():
     """
@@ -31,10 +36,16 @@ class GhostBokeh():
     """
     
     def __new__(cls, *args, **kwargs):
+        """
+        Invokes parent __new__() and then sets `__qualified_model__` property
+        
+        Examines the method resolution order of the target class, and
+        sets the qualified model to the name of the class that follows
+        'GhostBokeh' in the resolution order.
+        """
         obj = super().__new__(cls, *args, **kwargs)
         
         where_am_i = [t.__name__ for t in cls.__mro__].index("GhostBokeh")
         bokeh_parent = cls.__mro__[where_am_i + 1]
         obj.__qualified_model__ = bokeh_parent.__name__
         return obj
-
