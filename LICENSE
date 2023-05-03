@@ -73,3 +73,14 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+
+## Licenses and acknowledgements for incorporated data
+
+This section is a list of licenses and acknowledgements for third-party data included in the xplorts distribution.
+
+
+### Output per hour worked
+
+The datasets `oph annual bespoke.csv`, `oph annual by division.csv`, `oph annual by section.csv`, `oph quarterly by section.csv` are extracts from `outputperhourworked.xls`, which was downloaded from [Output per hour worked, UK](https://www.ons.gov.uk/economy/economicoutputandproductivity/productivitymeasures/datasets/outputperhourworkeduk).
+
+Source: Office for National Statistics licensed under the Open Government Licence v.3.0
