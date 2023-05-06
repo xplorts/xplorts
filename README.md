@@ -1,5 +1,11 @@
 # xplorts - Explore time series datasets
 
+col1 | col2
+--- | ---
+content of stuff | second column content
+
+not in the table any more?
+
 | --- | ---: |
 | `xplorts` ("explore-ts") is a collection of Python tools to make standalone HTML documents
 containing interactive charts.  It is particularly aimed at showing time series data (hence
