@@ -1,18 +1,6 @@
-# xplorts - Explore time series datasets
+# ![Thumbnail screenshot of xplorts productivity explorer](docs/xplor_lprod_thumbnail.png) Explore time series datasets 
 
-col1 | col2
---- | ---
-content of stuff | second column content
-
-not in the table any more?
-
-| --- | ---: |
-| `xplorts` ("explore-ts") is a collection of Python tools to make standalone HTML documents
-containing interactive charts.  It is particularly aimed at showing time series data (hence
-the "ts") with annual, quarterly or monthly periodicity, such as that published
-by national statistical institutes by way of national accounts, productivity, or labour
-markets series.
-| ![Thumbnail screenshot of xplorts productivity explorer](docs/xplor_lprod_thumbnail.png) |
+**`xplorts`** ("explore-ts") is a collection of Python tools to make standalone HTML documents containing interactive charts.  It is particularly aimed at showing time series data (hence the "ts") with annual, quarterly or monthly periodicity, such as that published by national statistical institutes by way of national accounts, productivity, or labour markets series. 
 
 Once created, the HTML documents can be used with any web browser.  They do not need an
 active internet connection.
@@ -24,9 +12,7 @@ pip install xplorts
 
 ## Demo
 
-![Thumbnail screenshot of xplorts productivity explorer](docs/xplor_lprod_thumbnail.png)
-
-[Explore UK output per hour worked](docs/xplor_lprod%20oph%20annual%20by%20section.html)
+To see a sample data explorer, try [Explore UK output per hour worked](docs/xplor_lprod%20oph%20annual%20by%20section.html).
 
 > Source: Office for National Statistics licensed under the Open Government Licence v.3.0
 
