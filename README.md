@@ -20,15 +20,18 @@ pip install xplorts
 ### Make explorer for ONS labour productivity data
 
 1. Download [Output per hour worked, UK](https://www.ons.gov.uk/economy/economicoutputandproductivity/productivitymeasures/datasets/outputperhourworkeduk) from the ONS web site.
+
 2. Extract productivity, gross value added and labour data using the utility script `ukons_lprod_to_csv.py`.
 ```
 python xplorts/utils/ukons_lprod_to_csv.py outputperhourworked.xlsx --quarterly --section
 ```
 Note: For older versions of Pandas you will have to open the Excel file, save it as `.xls`, and use that rather than the original `.xlsx` format.
+
 3. Run the script `xplor_lprod` to create a stand-alone `HTML` labour productivity explorer.
 ```
 python xplorts/xplor_lprod.py outputperhourworked.csv -d date -b industry -p lprod -g gva -l labour
 ```
+
 4. Use the explorer file `outputperhourworked.html` in any web browser.
 
 
