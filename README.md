@@ -16,6 +16,8 @@ pip install xplorts
 
 ## Demo
 
+![Thumbnail screenshot of xplorts productivity explorer](docs/xplor_lprod_thumbnail.png)
+
 [Explore UK output per hour worked](docs/xplor_lprod%20oph%20annual%20by%20section.html)
 
 > Source: Office for National Statistics licensed under the Open Government Licence v.3.0
