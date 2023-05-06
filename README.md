@@ -1,6 +1,6 @@
 # xplorts - Explore time series datasets
 
-|---|---:|
+| --- | ---: |
 | `xplorts` ("explore-ts") is a collection of Python tools to make standalone HTML documents
 containing interactive charts.  It is particularly aimed at showing time series data (hence
 the "ts") with annual, quarterly or monthly periodicity, such as that published
