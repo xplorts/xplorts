@@ -52,23 +52,29 @@ The labour productivity explorer demonstrates these features:
 1. Use the explorer in any web browser.
 
 
-## Documentation
-
-### Using `xplorts` in Python
+## Using `xplorts` in Python
 
 
 
-### Using `xplorts` on the command line
+## Using `xplorts` on the command line
 - Install (once, possibly within a particular virtual environment)
 - Open a `Terminal` window (Macintosh) or `Command prompt` window (Windows)
 - Activate virtual environment, if relevant
-    On Windows:
-    ```my_env```
-    On Mac:
-    ```conda activate my_env```
-- Run an `xplorts` script
 
-#### Getting help about command line options
+    On Windows:
+    
+    ```my_env```
+    
+    On Mac:
+    
+    ```conda activate my_env```
+- Tell `python` to run an `xplorts` script
+
+  ```
+  python xplor_lprod.py ...
+  ```
+
+### Getting help about command line options
 
 Pass the option `-h` to any `xplorts` script to get help.  For example:
 ```
@@ -104,3 +110,15 @@ python xplor_lprod.py -h
 >                         datafile base
 >   -s, --show            Show interactive .html
 </pre>
+
+### `xplorts` scripts
+
+Script | Description
+--- | ---
+lines.py | Create a line chart showing several time series with a split factor.  Widgets select one split factor category at a time.
+scatter.py | Create scatter chart showing one or more time series with a split factor.  Widgets select one split factor category at a time.
+snapcomp.py | Create a snapshot growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal stacked bars showing growth components, and a line showing overall growth.  A widget selects one time period at a time.
+stacks.py | Create stacked bar chart showing several data series with a split factor.  Widgets select one split factor at a time (or one time period at a time if the split factor is plotted as a chart axis).
+tscomp.py | Create a time series growth components chart, with time periods along the horizontal axis, vertical stacked bars showing growth components, and a line showing overall growth.  Widgets select one split factor category at a time.
+xplor_lprod.py | Create a labour productivity dashboard, with three charts including: <ul><li>a lines chart showing levels of labour productivity, gross value added, and labour,</li> <li>a time series growth components chart showing cumulative growth in labour productivity, gross value added, and labour, and</li> <li>a snapshot growth components chart showing period-on-period growth in labour productivity, gross value added, and labour.</li>
+utils/ukons_lprod_to_csv.py | Extract data from ONS labour productivity datasets such as [Output per hour worked, UK](https://www.ons.gov.uk/economy/economicoutputandproductivity/productivitymeasures/datasets/outputperhourworkeduk), in a format suitable for use with `xplorts` charts.
