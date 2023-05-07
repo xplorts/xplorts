@@ -50,17 +50,56 @@ The labour productivity explorer demonstrates these features:
 
 ## Documentation
 
+### Using `xplorts` in Python
 
 
-### Using xplorts on the command line
+
+### Using `xplorts` on the command line
 - Install (once, possibly within a particular virtual environment)
-- Open command line window (shell)
-- Activate virtual environment?
+- Open a `Terminal` window (Macintosh) or `Command prompt` window (Windows)
+- Activate virtual environment, if relevant
     On Windows:
-    ```activate python36_plus_hv2```
+    ```my_env```
     On Mac:
-    ```conda activate python36_plus_hv2```
-- Run command
+    ```conda activate my_env```
+- Run an `xplorts` script
+
+#### Getting help about command line options
+
+Pass the option `-h` to any `xplorts` script to get help.  For example:
+```
+python xplor_lprod.py -h
+```
+
+> <pre>
+> usage: xplor_lprod.py [-h] [-b BY] [-d DATE] [-p LPROD] [-v GVA] [-l LABOUR]
+>                       [-g ARGS] [-t SAVE] [-s]
+>                       datafile
+> 
+> Create interactive visualiser for labour productivity levels with a split
+> factor
+> 
+> positional arguments:
+>   datafile              File (CSV) with data series and split factor
+> 
+> optional arguments:
+>   -h, --help            Show this help message and exit
+>   -b BY, --by BY        Factor variable for splits
+>   -d DATE, --date DATE  Date variable
+>   -p LPROD, --lprod LPROD
+>                         Productivity variable
+>   -v GVA, --gva GVA     Gross value added (GVA) variable
+>   -l LABOUR, --labour LABOUR
+>                         Labour variable (e.g. jobs or hours worked)
+>   -g ARGS, --args ARGS  Keyword arguments.  YAML mapping of mappings.  The
+>                         keys 'lines', 'growth_series' and 'growth_snapshot' 
+>                         can provide keyword arguments to pass to
+>                         `prod_ts_lines`, `prod_ts_growth` and 
+>                         `prod_growth_snapshot`, respectively.
+>   -t SAVE, --save SAVE  Interactive .html to save, if different from the
+>                         datafile base
+>   -s, --show            Show interactive .html
+</pre>
 
 
 ---
