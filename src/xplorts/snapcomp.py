@@ -77,11 +77,11 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-from base import (add_hover_tool, factor_view, iv_dv_figure, filter_widget, 
-                  link_widgets_to_groupfilters, set_output_file, 
-                  unpack_data_varnames, variables_cmap)
-from scatter import grouped_scatter
-from stacks import grouped_stack
+from xplorts.base import (add_hover_tool, factor_view, iv_dv_figure, filter_widget, 
+                          link_widgets_to_groupfilters, set_output_file, 
+                          unpack_data_varnames, variables_cmap)
+from xplorts.scatter import grouped_scatter
+from xplorts.stacks import grouped_stack
 
 #%%
 

@@ -102,10 +102,11 @@ utils
     xplorts charts.
 """
 
-from . import (base, ghostbokeh, lines, scatter, slideselect, snapcomp, stacks,
+from . import (base, bokeh_stacks, dutils, ghostbokeh, lines, scatter, 
+               slideselect, snapcomp, stacks, stacks_util,
                tscomp, xplor_lprod)
 
 # Suppress code analysis warnings of unused imports.
-if False:
-    _ = (base, ghostbokeh, lines, scatter, slideselect, snapcomp, stacks,
-         tscomp, xplor_lprod)
+__all__ = ["base", "bokeh_stacks", "dutils", "ghostbokeh", "lines", "scatter", 
+           "slideselect", "snapcomp", "stacks", "stacks_util",
+           "tscomp", "xplor_lprod"]

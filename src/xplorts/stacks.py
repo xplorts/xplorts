@@ -69,10 +69,10 @@ from pathlib import Path
 import yaml
 
 ## Imports from this package
-from base import (extend_legend_items, factor_view, iv_dv_figure, 
-                  link_widgets_to_groupfilters, set_output_file, variables_cmap)
-from bokeh_stacks import hbar_stack_updown, vbar_stack_updown
-from slideselect import SlideSelect
+from xplorts.base import (extend_legend_items, factor_view, iv_dv_figure, 
+                          link_widgets_to_groupfilters, set_output_file, variables_cmap)
+from xplorts.bokeh_stacks import hbar_stack_updown, vbar_stack_updown
+from xplorts.slideselect import SlideSelect
 
 #%%
 def grouped_stack(

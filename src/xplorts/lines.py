@@ -72,12 +72,12 @@ import yaml
 
 from pandas.core.groupby.generic import DataFrameGroupBy
 
-from base import (add_hover_tool, extend_legend_items, 
-                  filter_widget, iv_dv_figure, 
-                  set_output_file, unpack_data_varnames, 
-                  variables_cmap)
-from dutils import date_tuples
-from slideselect import SlideSelect
+from xplorts.base import (add_hover_tool, extend_legend_items, 
+                          filter_widget, iv_dv_figure, 
+                          set_output_file, unpack_data_varnames, 
+                          variables_cmap)
+from xplorts.dutils import date_tuples
+from xplorts.slideselect import SlideSelect
 
 
 #%%

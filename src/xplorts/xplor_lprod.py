@@ -76,7 +76,7 @@ prod_ts_lines
 # Bokeh imports.
 from bokeh.layouts import column, layout
 from bokeh.models.widgets import Div
-from bokeh.io import show
+from bokeh.io import save, show
 from bokeh import palettes
 
 # Other external imports.
@@ -88,14 +88,13 @@ import textwrap
 import yaml
 
 # Internal imports.
-from base import (filter_widget, iv_dv_figure, 
-                  set_output_file, unpack_data_varnames, 
-                  variables_cmap)
-from dutils import date_tuples, growth_vars
-from lines import grouped_multi_lines, link_widget_to_lines
-from slideselect import SlideSelect
-from snapcomp  import components_figure, link_widget_to_snapcomp_figure
-from tscomp import link_widget_to_tscomp_figure, ts_components_figure
+from xplorts.base import (filter_widget, iv_dv_figure, 
+                          set_output_file, unpack_data_varnames, 
+                          variables_cmap)
+from xplorts.dutils import date_tuples, growth_vars
+from xplorts.lines import grouped_multi_lines, link_widget_to_lines
+from xplorts.snapcomp  import components_figure, link_widget_to_snapcomp_figure
+from xplorts.tscomp import link_widget_to_tscomp_figure, ts_components_figure
 
 #%%
 
@@ -272,9 +271,7 @@ def prod_ts_lines(data,
         link_widget_to_lines(widget, index_lines)
     return fig_index_lines
 
-
-# In[ ]:
-
+#%%
 
 def prod_ts_growth(data, 
                   widget=None, 
@@ -360,7 +357,7 @@ def prod_ts_growth(data,
     else:
         palette = [color_map[var] for var in ("lprod", "gva", "labour")]
 
-    growth_combi = ts_components_figure(
+    ts_components_figure(
         fig_combi,
         data_local,
         date_variable=dict(plot="_date_factor", hover=datevar),
@@ -377,8 +374,7 @@ def prod_ts_growth(data,
     return fig_combi
 
 
-# In[ ]:
-
+#%%
 
 def prod_growth_snapshot(data, 
                         widget=None, 
@@ -456,7 +452,7 @@ def prod_growth_snapshot(data,
     else:
         palette = [color_map[var] for var in ("lprod", "gva", "labour")]
     
-    snapshot_renderers = components_figure(
+    components_figure(
         fig_snapshot,
         data_local,
         by=date,
@@ -577,105 +573,3 @@ if __name__ == "__main__":
         show(app)  # Save file and display in web browser.
     else:
         save(app)  # Save file.
-
-
-# In[4]:
-
-
-if False:
-    by = "industry"
-
-    data_variables = ["oph", "gva", "hours"]
-    line_var = "oph"
-    bar_vars = [name for name in df_growth.columns                         if name not in (by, "date", line_var)]
-    growth_variables = [line_var, *bar_vars]
-
-    ref_date = df_index[datevar].min()
-    y_axis_label = f"Index ({ref_date} = 100)"
-
-    filter_widget = SlideSelect(options=sorted(df_index[by].unique()),
-                                title=by,  # Shown.
-                                name=by + "_filter")  # Internal.
-
-    date_widget = SlideSelect(options=sorted(df_index[datevar].unique()),
-                                title=datevar,  # Shown.
-                                name=datevar + "_filter")  # Internal.
-    date_widget.value = date_widget.options[-1]
-
-    ## Show index time series on line chart, split by industry.
-    fig_index_lines = iv_dv_figure(
-        iv_data = sorted(df_index[datevar].unique()),
-        iv_axis = "x",
-        height=300, width=500,
-        y_axis_label=y_axis_label,
-    )
-
-    index_lines = grouped_multi_lines(
-        fig_index_lines,
-        df_index, 
-        iv_variable=datevar,
-        data_variables=data_variables,
-        by=by,
-        cds_options={"color": palettes.Category20_3[::-1],
-                     "line_dash": ["solid", "solid", "dashed"]},
-        color="color",
-        line_dash="line_dash",
-        alpha=0.8,
-        hover_alpha=1,
-        line_width=2,
-        hover_line_width=4,
-    )
-
-    link_widget_to_lines(filter_widget, index_lines)
-
-
-    ## Show time series growth components (bars) and total (line).
-    fig_combi = iv_dv_figure(
-        iv_data = sorted(df_growth[datevar].unique()),
-        iv_axis = "x",
-        height=300, width=500,
-        y_axis_label=y_axis_label,
-    )
-
-    growth_combi = ts_components_figure(
-        fig_combi,
-        df_growth,
-        date_variable=datevar,
-        bar_variables=bar_vars,
-        line_variable=line_var,
-        by=by,
-        line_args={"color": palettes.Category20_3[-1]},
-        bar_args={"color": palettes.Category20_3[0:2][::-1]}
-    )
-
-    link_widget_to_tscomp_figure(filter_widget, fig_combi)
-
-    ## Show snapshot of latest growth components as hbars by industry.
-    fig_snapshot = iv_dv_figure(
-        iv_data = df_growth[by].unique(),
-        iv_axis = "y",
-        height=600, width=300,
-    )
-    snapshot_renderers = components_figure(
-        fig_snapshot,
-        df_growth,
-        by=datevar,
-        marker_variable=line_var,
-        y=by,
-        bar_variables=bar_vars,
-        scatter_args={"color": palettes.Category20_3[-1]},
-        bar_args={"color": palettes.Category20_3[0:2][::-1]},
-    )
-
-    link_widget_to_snapcomp_figure(date_widget, fig_snapshot)
-
-
-    # Make app that shows widget and charts.
-    ts_charts = column(filter_widget, fig_index_lines, fig_combi)
-    snapshot = column(date_widget, fig_snapshot)
-    app = layout([
-        [ts_charts, snapshot], 
-    ])
-
-    show(app)
-

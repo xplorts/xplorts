@@ -50,8 +50,8 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pathlib import Path
 
 # Imports from this package.
-from dutils import dict_fill
-from slideselect import SlideSelect
+from xplorts.dutils import dict_fill
+from xplorts.slideselect import SlideSelect
 
 #%%
 

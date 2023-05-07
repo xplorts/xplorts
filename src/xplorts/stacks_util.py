@@ -18,7 +18,7 @@ StackUp
 from bokeh.models import CustomJSExpr
 
 ## Imports from this package
-from ghostbokeh import GhostBokeh
+from xplorts.ghostbokeh import GhostBokeh
 
 #%%
 

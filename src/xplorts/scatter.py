@@ -71,10 +71,10 @@ from pathlib import Path
 import yaml
 
 ## Imports from this package
-from base import (add_hover_tool, extend_legend_items, factor_view, 
-                  filter_widget, iv_dv_figure, 
-                  link_widgets_to_groupfilters, set_output_file, variables_cmap)
-from slideselect import SlideSelect
+from xplorts.base import (add_hover_tool, extend_legend_items, factor_view, 
+                          filter_widget, iv_dv_figure, 
+                          link_widgets_to_groupfilters, set_output_file, variables_cmap)
+from xplorts.slideselect import SlideSelect
 
 #%%
 

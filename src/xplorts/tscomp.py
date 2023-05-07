@@ -76,13 +76,13 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-from base import (add_hover_tool, factor_view, filter_widget, 
-                  iv_dv_figure, link_widgets_to_groupfilters,
-                  set_output_file, unpack_data_varnames, 
-                  variables_cmap)
-from dutils import date_tuples
-from lines import grouped_multi_lines, link_widget_to_lines
-from stacks import grouped_stack
+from xplorts.base import (add_hover_tool, factor_view, filter_widget, 
+                          iv_dv_figure, link_widgets_to_groupfilters,
+                          set_output_file, unpack_data_varnames, 
+                          variables_cmap)
+from xplorts.dutils import date_tuples
+from xplorts.lines import grouped_multi_lines, link_widget_to_lines
+from xplorts.stacks import grouped_stack
 
 #%%
 def ts_components_figure(

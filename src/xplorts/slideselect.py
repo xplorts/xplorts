@@ -24,7 +24,7 @@ from bokeh.models import Column, CustomJS, Div, Select, Slider
 from bokeh.layouts import column, row
 from bokeh.io import show
 
-from ghostbokeh import GhostBokeh
+from xplorts.ghostbokeh import GhostBokeh
 
 #%%
 

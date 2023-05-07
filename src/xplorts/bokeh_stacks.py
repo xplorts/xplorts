@@ -68,8 +68,8 @@ THE POSSIBILITY OF SUCH DAMAGE.
 from bokeh.core.properties import expr
 
 ## Imports from this package
-from dutils import accumulate_list, pairwise
-from stacks_util import StackDown, StackUp
+from xplorts.dutils import accumulate_list, pairwise
+from xplorts.stacks_util import StackDown, StackUp
 
 #%%
 
