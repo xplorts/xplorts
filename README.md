@@ -1,3 +1,7 @@
+
+<!-- This document uses
+[Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/) -->
+
 # ![Thumbnail screenshot of xplorts productivity explorer](docs/xplor_lprod_thumbnail.png) Explore time series datasets 
 
 **`xplorts`** ("explore-ts") is a collection of Python tools to make standalone HTML documents containing interactive charts.  It is particularly aimed at showing time series data (hence the "ts") with annual, quarterly or monthly periodicity, such as that published by national statistical institutes by way of national accounts, productivity, or labour markets series. 
@@ -100,10 +104,3 @@ python xplor_lprod.py -h
 >                         datafile base
 >   -s, --show            Show interactive .html
 </pre>
-
-
----
-### Developer note
-This document uses
-[Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
-.
