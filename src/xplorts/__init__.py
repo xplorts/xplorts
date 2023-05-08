@@ -29,8 +29,8 @@ scatter.py
 snapcomp.py
     Create a snapshot growth components chart, with a categorical
     vertical axis showing levels of a split factor, horizontal stacked 
-    bars showing growth components, and a line showing overall growth.  
-    A widget selects one time period at a time.
+    bars showing growth components, and markers showing overall growth
+    for each stack of bars.  A widget selects one time period at a time.
 
 stacks.py
     Create stacked bar chart showing several data series with a split
@@ -79,7 +79,8 @@ slideselect
 snapcomp
     Modify a Bokeh Figure by adding a snapshot growth components chart, with a 
     categorical vertical axis showing levels of a split factor, horizontal 
-    stacked bars showing growth components, and a line showing overall growth.  
+    stacked bars showing growth components, and markers showing overall growth
+    for each stack of bars.  
 
 stacks
     Modify a Bokeh Figure by adding a horizontal or vertical stacked bar 
