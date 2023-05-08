@@ -2,7 +2,7 @@
 <!-- This document uses
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/) -->
 
-# ![Thumbnail screenshot of xplorts productivity explorer](docs/xplor_lprod_thumbnail.png) Explore time series datasets 
+# ![Thumbnail screenshot of xplorts productivity explorer](docs/png/xplor_lprod_thumbnail.png) Explore time series datasets 
 
 **`xplorts`** ("explore-ts") is a collection of Python tools to make standalone HTML documents containing interactive charts.  It is particularly aimed at showing time series data (hence the "ts") with annual, quarterly or monthly periodicity, such as that published by national statistical institutes by way of national accounts, productivity, or labour markets series. 
 
@@ -16,14 +16,14 @@ pip install xplorts
 
 ## Demo
 
-To see a sample data explorer, try [Explore UK output per hour worked](docs/xplor_lprod%20oph%20annual%20by%20section.html).
+To see an interactive sample data explorer, try [Explore UK output per hour worked](docs/xplor_lprod%20oph%20annual%20by%20section.html).
 
 > Source: Office for National Statistics licensed under the Open Government Licence v.3.0
 
 The labour productivity explorer demonstrates these features:
-- A grouped multi-line chart shows a set of related lines for one split level at a time, like time series for productivity, gross value added, and hours worked for a particular industry.
-- A time series components chart shows a set of stacked bars in combination with a totals line, for one split level at a time, like cumulative growth time series for gross value added, hours worked (sign reversed), and productivity for a particular industry.
-- A snapshot growth components chart shows a set of stacked bars in combination with markers showing total growth, as a function of a categorical factor, like growth for gross value added and hours worked (sign reversed) by industry, along with growth in productivity, for a selectable time period.
+- A grouped multi-line chart shows a set of related lines for one split level at a time, like time series for productivity, gross value added, and hours worked for a particular industry.<br> ![Thumbnail screenshot of lines chart](docs/png/xplor_lprod_lines_thumbnail_large.png)
+- A time series components chart shows a set of stacked bars in combination with a totals line, for one split level at a time, like cumulative growth time series for gross value added, hours worked (sign reversed), and productivity for a particular industry.<br> ![Thumbnail screenshot of time series growth components chart](docs/png/xplor_lprod_tscomp_thumbnail_large.png)
+- A snapshot growth components chart shows a set of stacked bars in combination with markers showing total growth, as a function of a categorical factor, like growth for gross value added and hours worked (sign reversed) by industry, along with growth in productivity, for a selectable time period.<br> ![Thumbnail screenshot of snapshot growth components chart](docs/png/xplor_lprod_snapcomp_thumbnail_large.png)
 - Drop-down list and slider widgets provide interactive selection of a categorical split level or snapshot time period to show.
 - Hover tool displays data values at the cursor location.
 - Chart tools include box zoom, wheel zoom, pan, and save to file.
