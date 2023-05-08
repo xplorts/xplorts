@@ -107,7 +107,8 @@ from . import (base, bokeh_stacks, dutils, ghostbokeh, lines, scatter,
                slideselect, snapcomp, stacks, stacks_util,
                tscomp, xplor_lprod)
 
-# Suppress code analysis warnings of unused imports.
+# Suppress code analysis warnings of unused imports; 
+#   see https://stackoverflow.com/a/31079085/16327476.
 __all__ = ["base", "bokeh_stacks", "dutils", "ghostbokeh", "lines", "scatter", 
            "slideselect", "snapcomp", "stacks", "stacks_util",
            "tscomp", "xplor_lprod"]
