@@ -9,30 +9,27 @@
 Once created, the HTML documents can be used with any web browser.  They do not need an
 active internet connection.
 
+<details>
+   <summary>
+
 ## Installation
+</summary>
+   
 ```
 pip install xplorts
 ```
-
+</details>
+<details>
+<summary>
+   
 ## Demo
+</summary>
 
 To see an interactive sample data explorer, try [Explore UK output per hour worked](docs/xplor_lprod%20oph%20annual%20by%20section.html).
 
 > Source: Office for National Statistics licensed under the Open Government Licence v.3.0
 
-## Features
-The labour productivity explorer demonstrates these features:
-- A grouped multi-line chart shows a set of related lines for one split level at a time, like time series for productivity, gross value added, and hours worked for a particular industry.<br> ![Thumbnail screenshot of lines chart](docs/png/xplor_lprod_lines_thumbnail_large.png)
-- A time series components chart shows a set of stacked bars in combination with a totals line, for one split level at a time, like cumulative growth time series for gross value added, hours worked (sign reversed), and productivity for a particular industry.<br> ![Thumbnail screenshot of time series growth components chart](docs/png/xplor_lprod_tscomp_thumbnail_large.png)
-- A snapshot growth components chart shows a set of stacked bars in combination with markers showing total growth, as a function of a categorical factor, like growth for gross value added and hours worked (sign reversed) by industry, along with growth in productivity, for a selectable time period.<br> ![Thumbnail screenshot of snapshot growth components chart](docs/png/xplor_lprod_snapcomp_thumbnail_large.png)
-- Drop-down list and slider widgets provide interactive selection of a categorical split level or snapshot time period to show. Static screenshots are shown here, but check out the interactive sample data explorer at the link above.<br> ![Screenshot of widgets to select industry](docs/png/slideselect_industry.png) ![Screenshot of widgets to select date](docs/png/slideselect_date.png)
-- Hover tool displays data values at the cursor location.
-- Chart tools include box zoom, wheel zoom, pan, and save to file.
-- Time periods can be represented on a chart axis as nested categories like (year, quarter).
-- A categorical chart axis can represent time periods or levels of a split factor.
-
-
-### Make explorer for ONS labour productivity data
+### Steps to make explorer for ONS labour productivity data
 
 1. Download [Output per hour worked, UK](https://www.ons.gov.uk/economy/economicoutputandproductivity/productivitymeasures/datasets/outputperhourworkeduk) from the ONS web site.
 
@@ -52,9 +49,31 @@ The labour productivity explorer demonstrates these features:
    python xplorts/xplor_lprod.py outputperhourworked.csv -d date -b industry -p lprod -g gva -l labour
    ```
 1. Use the explorer in any web browser.
+</details>
 
+
+<details>
+<summary>
+
+## Features 
+</summary>
+   
+The labour productivity explorer demonstrates these features:
+- A grouped multi-line chart shows a set of related lines for one split level at a time, like time series for productivity, gross value added, and hours worked for a particular industry.<br> ![Thumbnail screenshot of lines chart](docs/png/xplor_lprod_lines_thumbnail_large.png)
+- A time series components chart shows a set of stacked bars in combination with a totals line, for one split level at a time, like cumulative growth time series for gross value added, hours worked (sign reversed), and productivity for a particular industry.<br> ![Thumbnail screenshot of time series growth components chart](docs/png/xplor_lprod_tscomp_thumbnail_large.png)
+- A snapshot growth components chart shows a set of stacked bars in combination with markers showing total growth, as a function of a categorical factor, like growth for gross value added and hours worked (sign reversed) by industry, along with growth in productivity, for a selectable time period.<br> ![Thumbnail screenshot of snapshot growth components chart](docs/png/xplor_lprod_snapcomp_thumbnail_large.png)
+- Drop-down list and slider widgets provide interactive selection of a categorical split level or snapshot time period to show. Static screenshots are shown here, but check out the interactive sample data explorer at the link above.<br> ![Screenshot of widgets to select industry](docs/png/slideselect_industry.png) ![Screenshot of widgets to select date](docs/png/slideselect_date.png)
+- Hover tool displays data values at the cursor location.
+- Chart tools include box zoom, wheel zoom, pan, and save to file.
+- Time periods can be represented on a chart axis as nested categories like (year, quarter).
+- A categorical chart axis can represent time periods or levels of a split factor.
+</details>
+
+<details>
+<summary>
 
 ## Using `xplorts` in Python
+</summary>
 
 ### Import
 Import the package into your code:
@@ -86,9 +105,14 @@ snapcomp | Modify a Bokeh Figure by adding a snapshot growth components chart, w
 stacks | Modify a Bokeh Figure by adding a horizontal or vertical stacked bar chart showing several data series with a split factor.
 tscomp | Modify a Bokeh Figure by adding a time series growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal  stacked bars showing growth components, and a line showing overall growth.  
 xplor_lprod | Modify a Bokeh Figure by adding charts to show labour productivity levels or growth components.
+</details>
 
+<details>
+   <summary>
 
 ## Using `xplorts` on the command line
+   </summary>
+   
 - Install (once, possibly within a particular virtual environment)
 - Open a `Terminal` window (Macintosh) or `Command prompt` window (Windows)
 - Activate virtual environment, if relevant
@@ -154,3 +178,4 @@ stacks.py | Create stacked bar chart showing several data series with a split fa
 tscomp.py | Create a time series growth components chart, with time periods along the horizontal axis, vertical stacked bars showing growth components, and a line showing overall growth.  Widgets select one split factor category at a time.
 xplor_lprod.py | Create a labour productivity dashboard, with three charts including: <ul><li>a lines chart showing levels of labour productivity, gross value added, and labour,</li> <li>a time series growth components chart showing cumulative growth in labour productivity, gross value added, and labour, and</li> <li>a snapshot growth components chart showing period-on-period growth in labour productivity, gross value added, and labour.</li>
 utils/ukons_lprod_to_csv.py | Extract data from ONS labour productivity datasets such as [Output per hour worked, UK](https://www.ons.gov.uk/economy/economicoutputandproductivity/productivitymeasures/datasets/outputperhourworkeduk), in a format suitable for use with `xplorts` charts.
+</details>
