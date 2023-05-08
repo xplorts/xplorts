@@ -21,13 +21,14 @@ To see a sample data explorer, try [Explore UK output per hour worked](docs/xplo
 > Source: Office for National Statistics licensed under the Open Government Licence v.3.0
 
 The labour productivity explorer demonstrates these features:
-- Grouped multi-line charts show a set of related lines for one split level at a time, like time series for productivity, gross value added, and hours worked for a particular industry.
-- Grouped components charts show a set of stacked bars in combination with a totals line, for one split level at a time, like cumulative growth time series for gross value added, hours worked (sign reversed), and productivity for a particular industry.
-- Drop-down list and slider widgets provide interactive selection of the split level to show.
-- Hover tool displays data values under the cursor.
-- Charts are provided with controls for box zoom, wheel zoom, pan, and save to file.
+- A grouped multi-line chart shows a set of related lines for one split level at a time, like time series for productivity, gross value added, and hours worked for a particular industry.
+- A time series components chart shows a set of stacked bars in combination with a totals line, for one split level at a time, like cumulative growth time series for gross value added, hours worked (sign reversed), and productivity for a particular industry.
+- A snapshot growth components chart shows a set of stacked bars in combination with markers showing total growth, as a function of a categorical factor, like growth for gross value added and hours worked (sign reversed) by industry, along with growth in productivity, for a selectable time period.
+- Drop-down list and slider widgets provide interactive selection of a categorical split level or snapshot time period to show.
+- Hover tool displays data values at the cursor location.
+- Chart tools include box zoom, wheel zoom, pan, and save to file.
 - Time periods can be represented on a chart axis as nested categories like (year, quarter).
-- Categorical values represented on a chart axis can represent time periods, levels of a split factor, or whatever.
+- A categorical chart axis can represent time periods or levels of a split factor.
 
 
 ### Make explorer for ONS labour productivity data
