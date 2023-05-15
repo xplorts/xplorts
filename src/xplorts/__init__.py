@@ -16,34 +16,9 @@ cursor.  Chart tools support zoom and plot save.
 xplorts uses the [Bokeh](https://bokeh.org) interactive visualization 
 library.
 
-Scripts
--------
-lines.py
-    Create a line chart showing several time series with a split
-    factor.  Widgets select one split factor category at a time.
-    
-scatter.py
-    Create scatter chart showing one or more time series with a split
-    factor.  Widgets select one split factor category at a time.
-
-snapcomp.py
-    Create a snapshot growth components chart, with a categorical
-    vertical axis showing levels of a split factor, horizontal stacked 
-    bars showing growth components, and markers showing overall growth
-    for each stack of bars.  A widget selects one time period at a time.
-
-stacks.py
-    Create stacked bar chart showing several data series with a split
-    factor.  Widgets select one split factor at a time (or one time
-    period at a time if the split factor is plotted as a chart axis).
-
-tscomp.py
-    Create a time series growth components chart, with time periods
-    along the horizontal axis, vertical stacked bars showing growth
-    components, and a line showing overall growth.
-    Widgets select one split factor category at a time.
-
-xplor_lprod.py
+Command line interface entrypoints
+----------------------------------
+dblprod
     Create a labour productivity dashboard, with three charts including:
         - a lines chart showing levels of labour productivity, gross value 
             added, and labour,
@@ -51,6 +26,31 @@ xplor_lprod.py
             in labour productivity, gross value added, and labour, and
         - a snapshot growth components chart showing period-on-period
             growth in labour productivity, gross value added, and labour.
+
+lines
+    Create a line chart showing several time series with a split
+    factor.  Widgets select one split factor category at a time.
+    
+scatter
+    Create scatter chart showing one or more time series with a split
+    factor.  Widgets select one split factor category at a time.
+
+snapcomp
+    Create a snapshot growth components chart, with a categorical
+    vertical axis showing levels of a split factor, horizontal stacked 
+    bars showing growth components, and markers showing overall growth
+    for each stack of bars.  A widget selects one time period at a time.
+
+stacks
+    Create stacked bar chart showing several data series with a split
+    factor.  Widgets select one split factor at a time (or one time
+    period at a time if the split factor is plotted as a chart axis).
+
+tscomp
+    Create a time series growth components chart, with time periods
+    along the horizontal axis, vertical stacked bars showing growth
+    components, and a line showing overall growth.
+    Widgets select one split factor category at a time.
 
 utils/*.py
     Extract data from particular datasets to use with xplorts charts.
@@ -91,24 +91,30 @@ tscomp
     a categorical vertical axis showing levels of a split factor, horizontal 
     stacked bars showing growth components, and a line showing overall growth.  
 
-xplor_lprod
-    Modify a Bokeh Figure by adding charts to show labour productivity
-    levels or growth components.
-
 
 Subpackages (not exported)
 --------------------------
+dblprod
+    Make standalone interactive labour productvity dashboard charts
+
 utils
     Utilities for extracting data from particular datasets to use with
     xplorts charts.
 """
 
-from . import (base, bokeh_stacks, dutils, ghostbokeh, lines, scatter, 
-               slideselect, snapcomp, stacks, stacks_util,
-               tscomp, xplor_lprod)
+from . import (base, bokeh_stacks, dutils, ghostbokeh, 
+               slideselect, stacks_util)
+# Export API modules within sub-packages.
+from .lines import lines
+from .scatter import scatter
+from .snapcomp import snapcomp
+from .stacks import stacks
+from .tscomp import tscomp
 
 # Suppress code analysis warnings of unused imports; 
 #   see https://stackoverflow.com/a/31079085/16327476.
-__all__ = ["base", "bokeh_stacks", "dutils", "ghostbokeh", "lines", "scatter", 
-           "slideselect", "snapcomp", "stacks", "stacks_util",
-           "tscomp", "xplor_lprod"]
+__all__ = ["base", "bokeh_stacks", "dutils", "ghostbokeh", 
+           "lines", "scatter",
+           "slideselect", 
+           "snapcomp", "stacks", "slideselect", "stacks_util",
+           "tscomp"]
