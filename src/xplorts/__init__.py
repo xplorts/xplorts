@@ -116,5 +116,5 @@ from .tscomp import tscomp
 __all__ = ["base", "dutils", "ghostbokeh", 
            "lines", "scatter",
            "slideselect", 
-           "snapcomp", "stacks", "slideselect",
+           "snapcomp", "stacks",
            "tscomp"]
