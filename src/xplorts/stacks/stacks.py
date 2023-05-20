@@ -10,8 +10,9 @@ grouped_stack()
 
 
 ## Imports from this package
+from .bokeh_stacks import hbar_stack_updown, vbar_stack_updown
+
 from ..base import extend_legend_items
-from ..bokeh_stacks import hbar_stack_updown, vbar_stack_updown
 
 #%%
 def grouped_stack(
