@@ -102,8 +102,8 @@ utils
     xplorts charts.
 """
 
-from . import (base, bokeh_stacks, dutils, ghostbokeh, 
-               slideselect, stacks_util)
+from . import (base, dutils, ghostbokeh, 
+               slideselect)
 # Export API modules within sub-packages.
 from .lines import lines
 from .scatter import scatter
@@ -113,8 +113,8 @@ from .tscomp import tscomp
 
 # Suppress code analysis warnings of unused imports; 
 #   see https://stackoverflow.com/a/31079085/16327476.
-__all__ = ["base", "bokeh_stacks", "dutils", "ghostbokeh", 
+__all__ = ["base", "dutils", "ghostbokeh", 
            "lines", "scatter",
            "slideselect", 
-           "snapcomp", "stacks", "slideselect", "stacks_util",
+           "snapcomp", "stacks", "slideselect",
            "tscomp"]
