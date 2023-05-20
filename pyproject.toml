@@ -9,13 +9,28 @@ authors = [
   { name="Todd M Bailey", email="tmb@baileywick.plus.com" },
 ]
 description = "Make standalone interactive HTML charts to explore time series datasets"
+license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.6"
+dependencies = [
+    "bokeh >= 2.3.2",
+    "numpy >= 1.19.2",
+    "pandas >= 1.1.5",
+    "yaml >= 0.2.5",
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: 3-clause BSD",
     "Operating System :: OS Independent",
 ]
+
+[project.scripts]
+xp-dblprod = "xplorts.dblprod"
+xp-lines = "xplorts.lines"
+xp-scatter = "xplorts.scatter"
+xp-snapcomp = "xplorts.snapcomp"
+xp-stacks = "xplorts.stacks"
+xp-tscomp = "xplorts.tscomp"
 
 [project.urls]
 "Homepage" = "https://github.com/xplorts/xplorts"
