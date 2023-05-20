@@ -42,11 +42,11 @@ To see an interactive sample data explorer, try [Explore UK output per hour work
    python xplorts/utils/ukons_lprod_to_csv.py outputperhourworked.xlsx --quarterly --section
    ```
    Note: For older versions of Pandas you will have to open the Excel file, save it as `.xls`, and use that rather than the original `.xlsx` format.
-1. Run the script `xplor_lprod` to create a stand-alone `HTML` labour productivity explorer in the file `outputperhourworked.html`.
+1. Run the module `dblprod` to create a stand-alone `HTML` labour productivity dashboard in the file `outputperhourworked.html`.
 
    In the command shell or terminal window:
    ```
-   python xplorts/xplor_lprod.py outputperhourworked.csv -d date -b industry -p lprod -g gva -l labour
+   python -m xplorts.dblprod outputperhourworked.csv -d date -b industry -p lprod -g gva -l labour
    ```
 1. Use the explorer in any web browser.
 </details>
@@ -104,7 +104,7 @@ slideselect | Defines a class combining select and slider widgets, with support 
 snapcomp | Modify a Bokeh Figure by adding a snapshot growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal stacked bars showing growth components, and markers showing overall growth for each stack of bars.
 stacks | Modify a Bokeh Figure by adding a horizontal or vertical stacked bar chart showing several data series with a split factor.
 tscomp | Modify a Bokeh Figure by adding a time series growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal  stacked bars showing growth components, and a line showing overall growth.  
-xplor_lprod | Modify a Bokeh Figure by adding charts to show labour productivity levels or growth components.
+dblprod | Modify a Bokeh Figure by adding charts to show labour productivity levels or growth components.
 </details>
 
 <details>
@@ -119,26 +119,26 @@ xplor_lprod | Modify a Bokeh Figure by adding charts to show labour productivity
 
     On Windows:
     
-    ```my_env```
+    ```activate my_env```
     
     On Mac:
     
     ```conda activate my_env```
-- Tell `python` to run an `xplorts` script
+- Tell `python` to run an `xplorts` module
 
   ```
-  python xplor_lprod.py ...
+  python -m xplorts.dblprod ...
   ```
 
 ### Getting help about command line options
 
 Pass the option `-h` to any `xplorts` script to get help.  For example:
 ```
-python xplor_lprod.py -h
+python -m xplorts.dblprod -h
 ```
 
 > <pre>
-> usage: xplor_lprod.py [-h] [-b BY] [-d DATE] [-p LPROD] [-v GVA] [-l LABOUR]
+> usage: dblprod.py [-h] [-b BY] [-d DATE] [-p LPROD] [-v GVA] [-l LABOUR]
 >                       [-g ARGS] [-t SAVE] [-s]
 >                       datafile
 > 
@@ -171,11 +171,11 @@ python xplor_lprod.py -h
 
 Script | Description
 --- | ---
-lines.py | Create a line chart showing several time series with a split factor.  Widgets select one split factor category at a time.
-scatter.py | Create scatter chart showing one or more time series with a split factor.  Widgets select one split factor category at a time.
-snapcomp.py | Create a snapshot growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal stacked bars showing growth components, and a line showing overall growth.  A widget selects one time period at a time.
-stacks.py | Create stacked bar chart showing several data series with a split factor.  Widgets select one split factor at a time (or one time period at a time if the split factor is plotted as a chart axis).
-tscomp.py | Create a time series growth components chart, with time periods along the horizontal axis, vertical stacked bars showing growth components, and a line showing overall growth.  Widgets select one split factor category at a time.
-xplor_lprod.py | Create a labour productivity dashboard, with three charts including: <ul><li>a lines chart showing levels of labour productivity, gross value added, and labour,</li> <li>a time series growth components chart showing cumulative growth in labour productivity, gross value added, and labour, and</li> <li>a snapshot growth components chart showing period-on-period growth in labour productivity, gross value added, and labour.</li>
+dblprod | Create a labour productivity dashboard, with three charts including: <ul><li>a lines chart showing levels of labour productivity, gross value added, and labour,</li> <li>a time series growth components chart showing cumulative growth in labour productivity, gross value added, and labour, and</li> <li>a snapshot growth components chart showing period-on-period growth in labour productivity, gross value added, and labour.</li>
+lines | Create a line chart showing several time series with a split factor.  Widgets select one split factor category at a time.
+scatter | Create scatter chart showing one or more time series with a split factor.  Widgets select one split factor category at a time.
+snapcomp | Create a snapshot growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal stacked bars showing growth components, and a line showing overall growth.  A widget selects one time period at a time.
+stacks | Create stacked bar chart showing several data series with a split factor.  Widgets select one split factor at a time (or one time period at a time if the split factor is plotted as a chart axis).
+tscomp | Create a time series growth components chart, with time periods along the horizontal axis, vertical stacked bars showing growth components, and a line showing overall growth.  Widgets select one split factor category at a time.
 utils/ukons_lprod_to_csv.py | Extract data from ONS labour productivity datasets such as [Output per hour worked, UK](https://www.ons.gov.uk/economy/economicoutputandproductivity/productivitymeasures/datasets/outputperhourworkeduk), in a format suitable for use with `xplorts` charts.
 </details>
