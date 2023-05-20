@@ -1,23 +1,19 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Unit tests for scatter.py
-
-If run as a script, the tests are run
+Unit tests for xplorts.scatter
 
 @author: Todd Bailey
 """
 
-SCRIPT_NAME = "stacks.py"
+MODULE_NAME = "xplorts.stacks"
 OPTIONS = "-b date -v labour gva -y industry"
 DATA = "oph annual by section.csv"
 
 def test_stacks(helper_class, show=False):
     """
-    Run script `SCRIPT_NAME` with data
+    Run module `MODULE_NAME` with data
     """
     helpers = helper_class(__file__)
-    return_code = helpers.run_script(SCRIPT_NAME, 
+    return_code = helpers.run_script(module=MODULE_NAME, 
                                      options=OPTIONS, 
                                      data=DATA,
                                      show=show)

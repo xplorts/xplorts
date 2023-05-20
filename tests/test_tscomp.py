@@ -1,23 +1,21 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Unit tests for scatter.py
+Unit tests for xplorts.tscomp
 
-If run as a script, the tests are run
+Works with pytest, but can also be run as a script.
 
 @author: Todd Bailey
 """
 
-SCRIPT_NAME = "tscomp.py"
+MODULE_NAME = "xplorts.tscomp"
 OPTIONS = "-d date -y labour gva -l lprod -b industry"
 DATA = "oph annual by section.csv"
 
 def test_tscomp(helper_class, show=False):
     """
-    Run script `SCRIPT_NAME` with data
+    Run module `MODULE_NAME` with data
     """
     helpers = helper_class(__file__)
-    return_code = helpers.run_script(SCRIPT_NAME, 
+    return_code = helpers.run_script(module=MODULE_NAME, 
                                      options=OPTIONS, 
                                      data=DATA,
                                      show=show)

@@ -1,14 +1,17 @@
 """
-Unit tests for xplorts.scatter
+Unit tests for module dblprod
+
+If run as a script, the tests are run
 
 @author: Todd Bailey
 """
 
-MODULE_NAME = "xplorts.scatter"
-OPTIONS = "-x date -v lprod gva labour -b industry"
+MODULE_NAME = "xplorts.dblprod"
+OPTIONS = "-d date -p lprod -v gva -l labour -b industry"
 DATA = "oph annual by section.csv"
 
-def test_scatter(helper_class, show=False):
+
+def test_dblprod(helper_class, show=False):
     """
     Run module `MODULE_NAME` with data
     """
@@ -26,4 +29,4 @@ if __name__ == "__main__":
     from conftest import Helpers
     
     # Run the test function, showing the figure.
-    test_scatter(Helpers, show=True)
+    test_dblprod(Helpers, show=True)
