@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "xplorts"
-version = "0.2"
+version = "0.3"
 authors = [
   { name="Todd M Bailey", email="tmb@baileywick.plus.com" },
 ]
@@ -26,12 +26,12 @@ classifiers = [
 ]
 
 [project.scripts]
-xp-dblprod = "xplorts.dblprod"
-xp-lines = "xplorts.lines"
-xp-scatter = "xplorts.scatter"
-xp-snapcomp = "xplorts.snapcomp"
-xp-stacks = "xplorts.stacks"
-xp-tscomp = "xplorts.tscomp"
+xp-dblprod = "xplorts.dblprod.xpdblprod:main"
+xp-lines = "xplorts.lines.xplines:main"
+xp-scatter = "xplorts.scatter.xpscatter:main"
+xp-snapcomp = "xplorts.snapcomp.xpsnapcomp:main"
+xp-stacks = "xplorts.stacks.xpstacks:main"
+xp-tscomp = "xplorts.tscomp.xptscomp:main"
 
 [project.urls]
 "Homepage" = "https://github.com/xplorts/xplorts"
