@@ -20,8 +20,9 @@ dependencies = [
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: 3-clause BSD",
+    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
+    'Development Status :: 3 - Alpha',
 ]
 
 [project.scripts]
@@ -35,3 +36,9 @@ xp-tscomp = "xplorts.tscomp"
 [project.urls]
 "Homepage" = "https://github.com/xplorts/xplorts"
 "Bug Tracker" = "https://github.com/xplorts/xplorts/issues"
+
+[tool.hatch.build]
+exclude = [
+  "zz *",
+  "data/*.html",
+]
