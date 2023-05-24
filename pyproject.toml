@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "xplorts"
-version = "0.3"
+version = "0.5"
 authors = [
   { name="Todd M Bailey", email="tmb@baileywick.plus.com" },
 ]
@@ -16,7 +16,7 @@ dependencies = [
     "bokeh >= 2.3.2",
     "numpy >= 1.19.2",
     "pandas >= 1.1.5",
-    "yaml >= 0.2.5",
+    "pyyaml >= 5.4.1",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
