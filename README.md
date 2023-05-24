@@ -2,7 +2,7 @@
 <!-- This document uses
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/) -->
 
-# ![Thumbnail screenshot of xplorts productivity explorer](docs/png/xplor_lprod_thumbnail.png) Explore time series datasets 
+# Explore time series datasets 
 
 **`xplorts`** ("explore-ts") is a collection of Python tools to make standalone HTML documents containing interactive charts.  It is particularly aimed at showing time series data (hence the "ts") with annual, quarterly or monthly periodicity, such as that published by national statistical institutes by way of national accounts, productivity, or labour markets series. 
 
@@ -97,6 +97,7 @@ xplorts.slideselect?
 Module | Description
 --- | ---
 base | Miscellaneous helper functions and classes.
+dblprod | Modify a Bokeh Figure by adding charts to show labour productivity levels or growth components.
 ghostbokeh | Define an abstract base class to a build pseudo-subclass of a Bokeh class.
 lines | Modify a Bokeh Figure by adding line charts to show several time series with a split factor.
 scatter | Modify a Bokeh Figure by adding scatter charts to show one or more categorical series with a split factor.
@@ -104,7 +105,6 @@ slideselect | Defines a class combining select and slider widgets, with support 
 snapcomp | Modify a Bokeh Figure by adding a snapshot growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal stacked bars showing growth components, and markers showing overall growth for each stack of bars.
 stacks | Modify a Bokeh Figure by adding a horizontal or vertical stacked bar chart showing several data series with a split factor.
 tscomp | Modify a Bokeh Figure by adding a time series growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal  stacked bars showing growth components, and a line showing overall growth.  
-dblprod | Modify a Bokeh Figure by adding charts to show labour productivity levels or growth components.
 </details>
 
 <details>
