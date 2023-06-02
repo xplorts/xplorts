@@ -251,11 +251,25 @@ def factor_view(source, by, **kwargs):
     """
     
     assert isinstance(source, ColumnDataSource), f"source must be ColumnDataSource, not {type(source)}"
-    
-    view = CDSView(
-        source=source,
-        filters=factor_filters(by, source=source, **kwargs)
-    )
+
+    filters = factor_filters(by, source=source, **kwargs)
+    try:
+        # legacy call with gratuitous CDSView.source property
+        view = CDSView(
+            source=source,
+            filters=filters
+        )
+    except (AttributeError, DeprecationWarning):
+        # newer call without CDSView.source property
+        import operator
+        from itertools import reduce
+        # Combine multiple filters -- does this work?
+        filter = reduce(operator.and_, filters, True)
+        view = CDSView(
+            ##source=source,
+            filter=filter
+            )
+        
     return view
 
 
