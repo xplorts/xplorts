@@ -3,14 +3,14 @@ Make standalone interactive marker charts for categorical data
 
 When run from the command line, reads data from a `csv` file and
 creates an HTML document that displays an interactive line chart.
-    
-    In the `csv` file, the first row of data defines column names.  
+
+    In the `csv` file, the first row of data defines column names.
     The file should include:
-        - a column of independent variable categories, 
-        - a column of category names for a split factor, and 
+        - a column of independent variable categories,
+        - a column of category names for a split factor, and
         - one or more columns of data values to be plotted as markers
-          against the independent variable.  
-    
+          against the independent variable.
+
     An interactive chart is created, with widgets to select one of the split
     factor category names (from a pulldown list or a slider), and a chart with
     one series of markers for each value column.  The independent variable is
@@ -62,8 +62,8 @@ import yaml
 
 ## Imports from this package
 from xplorts.scatter import grouped_scatter
-from xplorts.base import (factor_view, 
-                          filter_widget, iv_dv_figure, 
+from xplorts.base import (factor_view,
+                          filter_widget, iv_dv_figure,
                           link_widgets_to_groupfilters, set_output_file, variables_cmap)
 from xplorts.slideselect import SlideSelect
 
@@ -72,16 +72,16 @@ from xplorts.slideselect import SlideSelect
 def _parse_args():
     """
     Parse command line arguments
-    
+
     Returns
     -------
     `argparse.Namespace` object
-    
+
     Examples
     --------
     args = _parse_args()
     data = pd.read_csv(args.datafile)
-    
+
     Resources
     ---------
     [argparse — Parser for command-line options, arguments and sub-commands](https://docs.python.org/3/library/argparse.html#dest)
@@ -91,7 +91,7 @@ def _parse_args():
         prog="python -m xplorts.scatter",
         description="Create interactive scatter plot for data series with a split factor"
     )
-    parser.add_argument("datafile", 
+    parser.add_argument("datafile",
                         help="File (CSV) with data series and split factor")
     parser.add_argument("-b", "--by", type=str,
                         help="Factor variable for splits")
@@ -105,18 +105,18 @@ def _parse_args():
     parser.add_argument("-m", "--marker", type=str,
                         help="Shape to use for markers.  Passed to Bokeh `Figure.scatter()`.")
 
-    parser.add_argument("-v", "--values", 
+    parser.add_argument("-v", "--values",
                         nargs="+", type=str,
                         help="Dependent variables to plot against independent variable")
-    
-    parser.add_argument("-g", "--args", 
+
+    parser.add_argument("-g", "--args",
                         type=str,
                         help="Keyword arguments for grouped_scatter(), specified as YAML mapping")
 
-    parser.add_argument("-t", "--save", type=str, 
+    parser.add_argument("-t", "--save", type=str,
                         help="Name of interactive .html to save, if different from the datafile base")
 
-    parser.add_argument("-s", "--show", action="store_true", 
+    parser.add_argument("-s", "--show", action="store_true",
                         help="Show interactive .html")
     args = parser.parse_args()
 
@@ -129,11 +129,11 @@ def main():
     """
     Parse command line arguments and make a scatter chart
     """
-    
+
     args = _parse_args()
 
     data = pd.read_csv(args.datafile, dtype=str)
-    
+
     # Unpack args specifying which columns to use.
     if all(getattr(args, arg) is None for arg in ["x", "y", "by", "values"]):
         # Get datevar from first column, byvar from second, values from remaining.
@@ -150,30 +150,33 @@ def main():
         else:
             iv_axis = "y"
             iv_variable = args.y
-            
+
     marker = args.marker or "circle"
-    
+
     title = "scatter: " + Path(args.datafile).stem
-    
+
     # Configure output file for interactive html.
     set_output_file(
         args.save or args.datafile,
         title = title
     )
-    
+
     # Convert str to float so we can plot the data.
     data[datavars] = data[datavars].astype(float)
-    
+
     # Make a slide-select widget to choose factor level.
     widget = SlideSelect(options=list(data[byvar].unique()),
                          name=byvar + "_select")
 
     source = ColumnDataSource(data)
     view_by_factor = factor_view(source, byvar)
+    # Get .filter attribute (newer bokeh) or .filters (pre bokeh 3.0).
+    filter = getattr(view_by_factor, "filter", None) or view_by_factor.filters
 
-    link_widgets_to_groupfilters(widget, 
-                                 view=view_by_factor)
-    
+    link_widgets_to_groupfilters(widget,
+                                 source=source,
+                                 filter=filter)
+
     # Map variables to colors.
     default_color_map = variables_cmap(datavars,
                                        "Category10_10")
@@ -199,25 +202,25 @@ def main():
             view=view_by_factor,
             color=default_color_map[var],
             **args.args)
-    
+
     # Make app that shows widget and chart.
     app = layout([
         Div(text="<h1>" + title),  # Show title as level 1 heading.
         [widget],
         [fig]
     ])
-    
+
     if args.show:
         show(app)  # Save file and display in web browser.
     else:
         save(app)  # Save file.
 
-    
+
 if __name__ == "__main__":
     sys.exit(main())
 
 #%% Move to test
-    
+
 if False:
     df_data = pd.DataFrame([
         (2001, 'A', 100, 100),
@@ -250,13 +253,13 @@ if False:
     baseline_index = df_growth.index + df_growth["growth_offset"]
     baseline = df_growth[data_variables].iloc[baseline_index, :].reset_index(drop=True)
     df_growth[data_variables] = (df_growth[data_variables] / baseline - 1) * 100
-    
+
     # Reverse sign where relevant.
     df_growth[sign_reverse_variables] *= -1
     sign_reverse_map = {name: name + " (sign reversed)" for name in sign_reverse_variables}
     df_growth.rename(columns=sign_reverse_map, inplace=True)
     growth_variables = [sign_reverse_map.get(name, name) for name in data_variables]
-        
+
     factor = "industry"
     factor_levels = sorted(df_data[factor].unique())
 
@@ -303,7 +306,7 @@ if False:
         fig_options={}
     )
 
-    
+
 
     # Make app that shows widget and chart.
     app = layout([

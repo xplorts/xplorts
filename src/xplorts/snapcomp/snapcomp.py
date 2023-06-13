@@ -35,7 +35,7 @@ def components_figure(
     Interactive chart showing snapshot components and total by split group
     """
 
-    source = ColumnDataSource(data)    
+    source = ColumnDataSource(data)
     view_by_factor = factor_view(source, by)
 
     # Make scatter chart first, for sake of legend.
@@ -49,10 +49,10 @@ def components_figure(
         **scatter_args
     )
     fig._scatter = [markers]
-    
+
     # Make stacked bars showing components.
-    tooltips = ([] if marker_variable is None 
-                else             
+    tooltips = ([] if marker_variable is None
+                else
                     # Show value of line, regardless.
                     [(marker_variable, f"@{marker_variable}{{0,0.0}}")]
                )
@@ -67,8 +67,8 @@ def components_figure(
         **bar_args,
     )
     fig._stacked = bars
-    
-    ## Define hover info for whole figure.    
+
+    ## Define hover info for whole figure.
     if isinstance(y, dict):
         iv_hover_variable = y["hover"]
     else:
@@ -81,8 +81,8 @@ def components_figure(
             (marker_variable, f"@{{{marker_variable}}}{{0[.]0 a}}")
         )
     tooltips.extend((bar, f"@{{{bar}}}{{0[.]0 a}}") for bar in bar_variables)
-    
-    hover = add_hover_tool(fig, 
+
+    hover = add_hover_tool(fig,
                            bars[0:1],  # Show tips just once for the stack, not for every glyph.
                            *tooltips,
                            name="Hover bar stack",
@@ -92,13 +92,13 @@ def components_figure(
                            attachment="vertical",
                            show_arrow = False,
                           )
-    
+
     if fig.toolbar.active_inspect == "auto":
         # Activate just the new hover tool.
         fig.toolbar.active_inspect = hover
     else:
         # Add the new hover to list of active inspectors.
-        fig.toolbar.active_inspect = fig.toolbar.active_inspect.append(hover)    
+        fig.toolbar.active_inspect = fig.toolbar.active_inspect.append(hover)
 
     return [markers] + bars
 
@@ -114,10 +114,16 @@ def link_widget_to_snapcomp_figure(widget, fig=None, renderers=None):
     else:
         # Assume we have a single renderer.
         sample = renderers
-    for cds_filter in sample.view.filters:
+
+    # Get .filter attribute (newer bokeh) or .filters (pre bokeh 3.0).
+    view = sample.view
+    filter = getattr(view, "filter", None)
+    filters = [filter] if filter is not None else view.filters
+
+    for cds_filter in filters:
         # Sync filter to widget.
         cds_filter.group = widget.value
     # Sync groupfilters to widget (for multi-lines?).
     link_widgets_to_groupfilters(widget,
-                                 source=sample.data_source, 
-                                 view=sample.view)
+                                 source=sample.data_source,
+                                 filter=filters)

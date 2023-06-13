@@ -42,16 +42,35 @@ from bokeh import palettes
 from bokeh.io import output_file
 from bokeh.models import (CDSView, ColumnDataSource, CustomJS, GroupFilter, FactorRange, 
                           HoverTool, Legend, LegendItem)
-from bokeh.models.formatters import FuncTickFormatter
+from bokeh.models import formatters as bk_formatters
+#from bokeh.models.formatters import FuncTickFormatter
 from bokeh.plotting import figure
+from bokeh.util.warnings import BokehDeprecationWarning
+
+import functools
+import operator
 
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pathlib import Path
 
+import warnings
+
 # Imports from this package.
 from xplorts.dutils import dict_fill
 from xplorts.slideselect import SlideSelect
+
+#%%
+
+# Use CustomJSTickFormatter for newer bokeh, or 
+# FuncTickFormatter for older bokeh.    
+def _custom_tick_formatter(code):
+    try:
+        cls = bk_formatters.CustomJSTickFormatter
+    except AttributeError:
+        cls = bk_formatters.FuncTickFormatter
+    return cls(code=code)
+
 
 #%%
 
@@ -252,23 +271,31 @@ def factor_view(source, by, **kwargs):
     
     assert isinstance(source, ColumnDataSource), f"source must be ColumnDataSource, not {type(source)}"
 
+    # Get list of one or more filters.
     filters = factor_filters(by, source=source, **kwargs)
-    try:
-        # legacy call with gratuitous CDSView.source property
-        view = CDSView(
-            source=source,
-            filters=filters
-        )
-    except (AttributeError, DeprecationWarning):
-        # newer call without CDSView.source property
-        import operator
-        from itertools import reduce
-        # Combine multiple filters -- does this work?
-        filter = reduce(operator.and_, filters, True)
-        view = CDSView(
-            ##source=source,
-            filter=filter
+    with warnings.catch_warnings():
+        # Catch deprecations from bokeh CDSView if necessary.
+        warnings.simplefilter("error")
+        try:
+            # Use legacy call with gratuitous CDSView.source property.
+            view = CDSView(
+                source=source,
+                filters=filters
             )
+        except (AttributeError, BokehDeprecationWarning):
+            # Use newer call without CDSView.source property.
+            if len(filters):
+                if len(filters) == 1:
+                    # use the single filter as is.
+                    filter = filters[0]
+                else:
+                    # Combine multiple filters with logical `and`.
+                    filter = functools.reduce(operator.and_, filters)
+                    
+                view = CDSView(filter=filter)
+            else:
+                # No filters to apply.
+                view = CDSView()
         
     return view
 
@@ -351,7 +378,7 @@ def iv_dv_figure(
         # Suppress most lowest level categorical tick labels.
         # If tick labels are tuples, higher levels will be displayed
         # as normal.
-        tf_margins_only = FuncTickFormatter(
+        tf_margins_only = _custom_tick_formatter(
             code="""
             if ((index == 0) | (index == ticks.length - 1)) {
                 return tick;
@@ -375,7 +402,7 @@ def iv_dv_figure(
     return fig
 
 
-def link_widgets_to_groupfilters(widgets, view=None, source=None, filters=None):
+def link_widgets_to_groupfilters(widgets, source, filter):
     """
     Link values of widgets to corresponding GroupFilter objects
     
@@ -385,12 +412,10 @@ def link_widgets_to_groupfilters(widgets, view=None, source=None, filters=None):
         The `value` property of each widget will be linked to the
         `group` property of the corresponding `GroupFilter`.  If there are
         more widgets than filters, the excess widgets are ignored.
-    view : CDSView, optional
-        Provides `source` and `filters` if they are not specified directly.
     source : ColumnDataSource
         Data source, which will be configured to emit a change signal when
         a filter's `group` property changes, to re-render the relevant figure.
-    filters : GroupFilter or sequence of GroupFilter
+    filter : GroupFilter or sequence of GroupFilter
         The `group` property of each filter will be updated whenever the
         `value` of the corresponding widget changes, and `source` will emit
         a change signal whenever the `group` property of a filter changes.  If
@@ -406,31 +431,17 @@ def link_widgets_to_groupfilters(widgets, view=None, source=None, filters=None):
     widget = SlideSelect(options=["A", "B"],
                          name="industry_filter")  # Show this in a layout.
     link_widgets_to_groupfilters(widget, 
-                                 view=view_by_factor)
-    
-    # Source and filter can be specified directly.
-    link_widgets_to_groupfilters(widget, 
                                  source=source,
-                                 filters=view_by_factor.filters)
+                                 filter=view_by_factor.filters)
     """
-
-    if all(x is None for x in (view, source, filters)):
-        raise ValueError("Must either specify source and filters, or view")
-    
-    if source is None:
-        source = view.source
-    
-    if filters is None:
-        # Find filters in view, assumed to correspond to widgets.
-        filters = view.filters
     
     # Wrap singleton widget or filter, for convenience.
     if not isinstance(widgets, (list, tuple)):
         widgets = [widgets]
-    if not isinstance(filters, (list, tuple)):
-        filters = [filters]
+    if not isinstance(filter, (list, tuple)):
+        filter = [filter]
         
-    for widget, filt in zip(widgets, filters):
+    for widget, filt in zip(widgets, filter):
         # Link widget to the GroupFilter.
         assert isinstance(filt, GroupFilter)
         widget.js_link("value", other=filt, other_attr="group")

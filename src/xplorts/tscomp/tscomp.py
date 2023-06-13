@@ -17,7 +17,7 @@ link_widget_to_tscomp_figure
 from bokeh.models import ColumnDataSource
 
 ## Imports from this package
-from ..base import (add_hover_tool, factor_view, 
+from ..base import (add_hover_tool, factor_view,
                           link_widgets_to_groupfilters)
 from ..lines import grouped_multi_lines, link_widget_to_lines
 from ..stacks import grouped_stack
@@ -35,17 +35,17 @@ def ts_components_figure(
 ):
     """
     Interactive chart showing time series components and total by split group
-    
+
     Parameters
     ----------
     date_variable: str or dict
         If str, the name of a data column, which will be shown on the horizontal
-        axis.  
-        
+        axis.
+
         If dict, should map key "plot" to a variable to show on the
         horizontal axis and should map key "hover" to a corresponding variable
         to display in hover information.  This is often useful when displaying
-        quarterly dates as nested categories like `("2020", "Q1")`.    
+        quarterly dates as nested categories like `("2020", "Q1")`.
 
     """
 
@@ -59,9 +59,9 @@ def ts_components_figure(
         **line_args
     )
 
-    source = ColumnDataSource(data)    
+    source = ColumnDataSource(data)
     view_by_factor = factor_view(source, by)
-    
+
     # Make stacked bars showing components.
     bars = grouped_stack(
         fig,
@@ -72,8 +72,8 @@ def ts_components_figure(
         view=view_by_factor,
         **bar_args,
     )
-    
-    ## Define hover info for whole figure.    
+
+    ## Define hover info for whole figure.
     if isinstance(date_variable, dict):
         iv_hover_variable = date_variable["hover"]
     else:
@@ -86,8 +86,8 @@ def ts_components_figure(
             (line_variable, f"@{{{line_variable}}}{{0[.]0 a}}")
         )
     tooltips.extend((bar, f"@{{{bar}}}{{0[.]0 a}}") for bar in bar_variables)
-    
-    hover = add_hover_tool(fig, 
+
+    hover = add_hover_tool(fig,
                            bars[0:1],  # Show tips just once for the stack, not for every glyph.
                            *tooltips,
                            name="Hover bar stack",
@@ -97,23 +97,23 @@ def ts_components_figure(
                            attachment="horizontal",
                            show_arrow = False,
                           )
-    
+
     if fig.toolbar.active_inspect == "auto":
         # Activate just the new hover tool.
         fig.toolbar.active_inspect = hover
     else:
         # Add the new hover to list of active inspectors.
-        fig.toolbar.active_inspect = fig.toolbar.active_inspect.append(hover)    
-    
+        fig.toolbar.active_inspect = fig.toolbar.active_inspect.append(hover)
+
     fig._lines = lines
     fig._stacked = bars
-    
+
     return lines + bars
 
 #%%
 def link_widget_to_tscomp_figure(widget, fig=None, lines=None, bars=None):
     """
-    
+
     """
     if lines is None:
         lines = fig._lines
@@ -121,7 +121,10 @@ def link_widget_to_tscomp_figure(widget, fig=None, lines=None, bars=None):
         bars = fig._stacked
     source = bars[0].data_source
     view = bars[0].view
+    # Get .filter attribute (newer bokeh) or .filters (pre bokeh 3.0).
+    filter = getattr(view, "filter", None) or view.filters
+
     link_widget_to_lines(widget, lines)
     link_widgets_to_groupfilters(widget,
-                                 source=source, 
-                                 view=view)
+                                 source=source,
+                                 filter=filter)
