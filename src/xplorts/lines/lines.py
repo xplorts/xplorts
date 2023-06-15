@@ -7,7 +7,7 @@ grouped_multi_lines
     Add a multi-line plot to a figure, with legend entries and hover tooltip.
 
 link_widget_to_lines
-    Arrange to update the `visible` property of multi-line renderers 
+    Arrange to update the `visible` property of multi-line renderers
     in the browser when a selection changes.
 """
 
@@ -31,24 +31,24 @@ from ..slideselect import SlideSelect
 def link_widget_to_lines(widget, renderers):
     """
     Attach callback to selection widget, to update visibility of renderers
-    
+
     The JS callback is triggered by changes to the `value` property of
     the widget.  When triggered, the callback hides the current renderer
     and unhides the renderer indexed by the new value of the widget.
-    
+
     The first time it is triggered the callback hides the first renderer.
     To work correctly with a different initial visible renderer other than
-    renderers[0], set the `.option_index` property of the widget to the 
+    renderers[0], set the `.option_index` property of the widget to the
     index of the initial visible renderer.
-    
+
     Parameters
     ----------
     widget: Bokeh widget or layout
         May be an object with a `value` attribute and a method `js_on_change()`,
-        like a Bokeh widget.  Alternatively, may be an object with a `handle` 
+        like a Bokeh widget.  Alternatively, may be an object with a `handle`
         attribute which is itself an object with a `value` attribute and a method
         `js_on_change()`, like a `SlideSelect` layout of two widgets.
-    
+
     renderers: list
         List of Bokeh renderers, typically from the `renderers` property of a
         Bokeh `figure`.  The callback will set the `visible` property of individual
@@ -70,7 +70,7 @@ def link_widget_to_lines(widget, renderers):
                     this.previous_index = 0;  // Assume first glyph might be visible.
                 else if (option_index != this.recent_index)
                     this.previous_index = this.recent_index;
-                                
+
                 // Hide currently visible glyph.
                 glyphs[this.previous_index].visible = false;
                 console.log('Made glyph ' + this.option_index + ' INvisible');
@@ -78,7 +78,7 @@ def link_widget_to_lines(widget, renderers):
                 // Show glyph currently selected by widget.
                 glyphs[option_index].visible = true;
                 console.log('Made glyph ' + option_index + ' visible');
-                
+
                 // Save current option_index to check next time.
                 this.recent_index = option_index;
             """
@@ -100,36 +100,53 @@ _hover_segment_value = CustomJSHover(
         return "" + result;
     """)
 
+# Flexible formatter to pick one number out of a list (as for
+# multi_line `xs` or `ys`), and format it with one decimal place.
+# Safe to use on scalar values too.
+# Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num)
+#  https://stackoverflow.com/a/69647144/16327476
+_hover_segment_fixedvalue = CustomJSHover(
+    code="""
+        console.log("> _hover_segment_fixedvalue", value);
+        if (Array.isArray(value))
+            // Index into value with segment_index (e.g. for multi-line).
+            var result = value[special_vars["segment_index"]];
+        else
+            // Use (scalar?) value directly.
+            result = value;
+        result = Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(result);
+        return "" + result;
+    """)
 
 #%%
 
 class _MultilineDataBuilder():
     """
     Maps names of columns to lists of lists, or sequences or arrays
-    
-    A class with helper methods to build 
+
+    A class with helper methods to build
     columns appropriate for `multi_line` glyphs.
-    
+
     Methods
     -------
-    
+
     """
-    
+
     data = pd.DataFrame()
-    
+
     def __init__(self, xs, data_variables=None, iv_variable=None, hover_data=None,
                  options={}, **kwargs):
-    
+
         if iv_variable is None:
             iv_variable = xs.name
         xs = list(xs)
-        
+
         if data_variables is None:
             if kwargs == {}:
                 raise ValueError("missing data_variables")
             # Use (first) kwarg as column name for list of variable names.
             index_name, data_variables = kwargs.pop(next(iter(kwargs)))
-            
+
             # Give warning about excess kwargs.
             if len(kwargs):
                 warnings.warn(f"extra keywords ignored: {kwargs.keys()}")
@@ -143,28 +160,28 @@ class _MultilineDataBuilder():
 
         # Use same independent axis for each variable.
         self.fill_column(iv_variable, xs)
-        
+
         if hover_data is not None:
             # Use same IV axis hover data for each variable.
             self.fill_column(hover_data.name, list(hover_data))
-        
+
         self.options(options)
-        
+
     def fill_column(self, column, value):
         """
         Assign the same value to each row
         """
-        
+
         self.data[column] = [value] * len(self.data.index)
-    
+
     def set_column(self, column, values):
         """
         Assign values to corresponding rows of a column
-        
+
         Values can be a scalar, a list with one value per row,
         a Series, or a mapping.
         """
-        
+
         # Coerce setting to Series compatible with .data.
         #  - Scalar will broadcast to fill column.
         #  - List must be same length as .data.index.
@@ -176,7 +193,7 @@ class _MultilineDataBuilder():
         """
         Set columns with per-variable values
         """
-        
+
         if len(args):
             assert len(args) == 1, "expected at most one positional argument"
             assert isinstance(args[0], dict), "positional argument should be a mapping"
@@ -191,13 +208,13 @@ class _MultilineDataBuilder():
         """
         Coerce data to ColumnDataSource suitable for multi_line()
         """
-        
+
         # Coerce to dict of dict; {column: {row: value, ...}, ...}.
         dod = self.data.reset_index().to_dict()
         # Collapse to dict of lists; {column: [value, ...], ...}.
         dol = {column: list(d.values()) for column, d in dod.items()}
         return ColumnDataSource(dol)
-        
+
 
 #%%
 
@@ -213,14 +230,14 @@ def grouped_multi_lines(
     """
     Add multi_line chart overlays to a plot, for time series data with
     a set of factor levels.
-    
-    Adds to a Bokeh `figure`, one `multi_line` glyph for each unique value of 
+
+    Adds to a Bokeh `figure`, one `multi_line` glyph for each unique value of
     `by`, with legend entries and hover tooltip.
-    
+
     Dates are plotted along the horizontal axis.  The first `multi_line`
     is initially visible and the rest are hidden by setting their `visible`
     property to `False`.
-    
+
     Parameters
     ----------
     fig: Bokeh Figure
@@ -230,8 +247,8 @@ def grouped_multi_lines(
         and one or more value variables.
     iv_variable: str or dict
         If str, the name of a data column, which will be shown on the horizontal
-        axis.  
-        
+        axis.
+
         If dict, should map key "plot" to a variable to show on the
         horizontal axis and should map key "hover" to a corresponding variable
         to display in hover information.  This is often useful when displaying
@@ -240,8 +257,8 @@ def grouped_multi_lines(
         Names of data columns.  The chart will show a line for each data
         variable.
     by: str, default None
-        Name of a categorical factor variable.  Required if `data` is a 
-        `DataFrame`, ignored if `data` is a `DataFrameGroupBy` object.  
+        Name of a categorical factor variable.  Required if `data` is a
+        `DataFrame`, ignored if `data` is a `DataFrameGroupBy` object.
         A multi_line glyph will be created for each unique value of the
         `by` variable.
     cds_options: dict, default {}
@@ -252,27 +269,27 @@ def grouped_multi_lines(
         Pre-existing tooltips to add to the hover tool in addition to the
         default tooltips.
     """
-    
+
     if data_variables in (None, []):
         # Return empty list of renderers.
         return []
-    
+
     # Wrap single data variable in list if necessary.
     if isinstance(data_variables, str):
         data_variables = [data_variables]
-    
+
     if isinstance(data, DataFrameGroupBy):
         grouped = data
     else:
         # Group data, preserving order of `by`.
         grouped = data.groupby(by=by, sort=False)
-    
+
     if isinstance(iv_variable, dict):
         iv_plot_variable = iv_variable["plot"]
         iv_hover_variable = iv_variable["hover"]
     else:
         iv_plot_variable = iv_hover_variable = iv_variable
-    
+
     # Make template multi_line_data based on first group.
     _, df0 = next(iter(grouped))
     mldata = _MultilineDataBuilder(
@@ -294,14 +311,14 @@ def grouped_multi_lines(
         mldata.set_column("group", group_name)
 
         fig.multi_line(
-            xs=iv_plot_variable, 
+            xs=iv_plot_variable,
             ys="value",
             name="lines_" + group_name,
             source=mldata.as_cds,
             visible=False,
             **kwargs
         )
-        
+
     lines = fig.renderers[next_renderer_idx:]
 
     # Show first set of lines.
@@ -312,8 +329,8 @@ def grouped_multi_lines(
     new_legend_items = [
             # Include legend item for each variable,
             #  using styles from the first multi_line renderer.
-            LegendItem(label=var, 
-                       renderers=[first_multi_line], 
+            LegendItem(label=var,
+                       renderers=[first_multi_line],
                        index=i
                       ) \
             for i, var in enumerate(data_variables)
@@ -322,17 +339,19 @@ def grouped_multi_lines(
         fig,
         items=new_legend_items,
     )
-    
-    
+
+
     ## Define hover info for lines.
     # Show name of hovered glyph, along with hover-date and the value.
-    lines_tooltip = f"@variable @{iv_hover_variable}{{custom}}: $data_y{{0,0.0}}"
-    add_hover_tool(fig, lines, 
-                   ("line", lines_tooltip), 
+    # lines_tooltip = f"@variable @{iv_hover_variable}{{custom}}: $data_y{{0,0.0}}"
+    lines_tooltip = f"@variable @{iv_hover_variable}{{custom}}: @value{{custom}}"
+    add_hover_tool(fig, lines,
+                   ("line", lines_tooltip),
                    (by if by is not None else "group", "@group"),
                    *tooltips,
                    attachment="vertical",
-                   formatters={f'@{iv_hover_variable}': _hover_segment_value},
+                   formatters={f'@{iv_hover_variable}': _hover_segment_value,
+                               '@value': _hover_segment_fixedvalue},
                    name="Hover lines",
                    description="Hover lines",
                   )
@@ -341,7 +360,7 @@ def grouped_multi_lines(
 
 
 #%% Move to test.
-    
+
 if False: #__name__ == "__main__":
     # Make a test chart to show in Jupyter.
     df_data = pd.DataFrame.from_records([
@@ -359,18 +378,18 @@ if False: #__name__ == "__main__":
     df_data["date"] = pd.to_datetime(df_data["date"].astype(str)).dt.to_period("A")
     df_data["year"] = df_data["date"].dt.year
     df_data["quarter"] = df_data["date"].dt.quarter
-    
+
     # Make a slide-select widget to choose industry.
     widget = SlideSelect(options=list(df_data["industry"].unique()),
                          name="industry_select")
-    
-    fig = grouped_multi_lines(df_data, 
+
+    fig = grouped_multi_lines(df_data,
                               data_variables=["oph_idx", "gva_idx", "hours_idx"],
                               palette=palettes.Category20_3[::-1],
                               by="industry",
                               line_style_map={"hours_idx": "dashed"},
                               widget=widget)
-    
+
     app = layout([
         [widget],
         [fig]
