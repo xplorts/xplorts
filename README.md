@@ -2,9 +2,9 @@
 <!-- This document uses
 [Github-flavored Markdown](https://guides.github.com/features/mastering-markdown/) -->
 
-# Explore time series datasets 
+# Explore time series datasets
 
-**`xplorts`** ("explore-ts") is a collection of Python tools to make standalone HTML documents containing interactive charts.  It is particularly aimed at showing time series data (hence the "ts") with annual, quarterly or monthly periodicity, such as that published by national statistical institutes by way of national accounts, productivity, or labour markets series. 
+**`xplorts`** ("explore-ts") is a collection of Python tools to make standalone HTML documents containing interactive charts.  It is particularly aimed at showing time series data (hence the "ts") with annual, quarterly or monthly periodicity, such as that published by national statistical institutes by way of national accounts, productivity, or labour markets series.
 
 Once created, the HTML documents can be used with any web browser.  They do not need an
 active internet connection.
@@ -14,14 +14,19 @@ active internet connection.
 
 ## Installation
 </summary>
-   
+
 ```
 pip install xplorts
+```
+
+For `xplorts.utils.ukons_lprod_to_csv`, you also need `openpyxl`:
+```
+pip install openpyxl
 ```
 </details>
 <details>
 <summary>
-   
+
 ## Demo
 </summary>
 
@@ -55,9 +60,9 @@ To see an interactive sample data explorer, try [Explore UK output per hour work
 <details>
 <summary>
 
-## Features 
+## Features
 </summary>
-   
+
 The labour productivity explorer demonstrates these features:
 - A grouped multi-line chart shows a set of related lines for one split level at a time, like time series for productivity, gross value added, and hours worked for a particular industry.<br> ![Thumbnail screenshot of lines chart](docs/png/xplor_lprod_lines_thumbnail_large.png)
 - A time series components chart shows a set of stacked bars in combination with a totals line, for one split level at a time, like cumulative growth time series for gross value added, hours worked (sign reversed), and productivity for a particular industry.<br> ![Thumbnail screenshot of time series growth components chart](docs/png/xplor_lprod_tscomp_thumbnail_large.png)
@@ -104,7 +109,7 @@ scatter | Modify a Bokeh Figure by adding scatter charts to show one or more cat
 slideselect | Defines a class combining select and slider widgets, with support for javascript linking to other objects.
 snapcomp | Modify a Bokeh Figure by adding a snapshot growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal stacked bars showing growth components, and markers showing overall growth for each stack of bars.
 stacks | Modify a Bokeh Figure by adding a horizontal or vertical stacked bar chart showing several data series with a split factor.
-tscomp | Modify a Bokeh Figure by adding a time series growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal  stacked bars showing growth components, and a line showing overall growth.  
+tscomp | Modify a Bokeh Figure by adding a time series growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal  stacked bars showing growth components, and a line showing overall growth.
 </details>
 
 <details>
@@ -112,19 +117,23 @@ tscomp | Modify a Bokeh Figure by adding a time series growth components chart, 
 
 ## Using `xplorts` on the command line
    </summary>
-   
+
 - Install (once, possibly within a particular virtual environment)
 - Open a `Terminal` window (Macintosh) or `Command prompt` window (Windows)
 - Activate virtual environment, if relevant
 
     On Windows:
-    
+
     ```activate my_env```
-    
+
     On Mac:
-    
+
     ```conda activate my_env```
-- Tell `python` to run an `xplorts` module
+- Execute an `xplorts` module entry point
+  ```
+  xp-dblprod ...
+  ```
+- Or tell `python` explicitly to run an `xplorts` module
 
   ```
   python -m xplorts.dblprod ...
@@ -133,21 +142,26 @@ tscomp | Modify a Bokeh Figure by adding a time series growth components chart, 
 ### Getting help about command line options
 
 Pass the option `-h` to any `xplorts` script to get help.  For example:
-```
-python -m xplorts.dblprod -h
-```
+  ```
+  xp-dblprod -h
+  ```
+
+Or
+  ```
+  python -m xplorts.dblprod -h
+  ```
 
 > <pre>
 > usage: dblprod.py [-h] [-b BY] [-d DATE] [-p LPROD] [-v GVA] [-l LABOUR]
 >                       [-g ARGS] [-t SAVE] [-s]
 >                       datafile
-> 
+>
 > Create interactive visualiser for labour productivity levels with a split
 > factor
-> 
+>
 > positional arguments:
 >   datafile              File (CSV) with data series and split factor
-> 
+>
 > optional arguments:
 >   -h, --help            Show this help message and exit
 >   -b BY, --by BY        Factor variable for splits
@@ -158,9 +172,9 @@ python -m xplorts.dblprod -h
 >   -l LABOUR, --labour LABOUR
 >                         Labour variable (e.g. jobs or hours worked)
 >   -g ARGS, --args ARGS  Keyword arguments.  YAML mapping of mappings.  The
->                         keys 'lines', 'growth_series' and 'growth_snapshot' 
+>                         keys 'lines', 'growth_series' and 'growth_snapshot'
 >                         can provide keyword arguments to pass to
->                         `prod_ts_lines`, `prod_ts_growth` and 
+>                         `prod_ts_lines`, `prod_ts_growth` and
 >                         `prod_growth_snapshot`, respectively.
 >   -t SAVE, --save SAVE  Interactive .html to save, if different from the
 >                         datafile base
@@ -169,13 +183,13 @@ python -m xplorts.dblprod -h
 
 ### `xplorts` scripts
 
-Script | Description
---- | ---
-dblprod | Create a labour productivity dashboard, with three charts including: <ul><li>a lines chart showing levels of labour productivity, gross value added, and labour,</li> <li>a time series growth components chart showing cumulative growth in labour productivity, gross value added, and labour, and</li> <li>a snapshot growth components chart showing period-on-period growth in labour productivity, gross value added, and labour.</li>
-lines | Create a line chart showing several time series with a split factor.  Widgets select one split factor category at a time.
-scatter | Create scatter chart showing one or more time series with a split factor.  Widgets select one split factor category at a time.
-snapcomp | Create a snapshot growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal stacked bars showing growth components, and a line showing overall growth.  A widget selects one time period at a time.
-stacks | Create stacked bar chart showing several data series with a split factor.  Widgets select one split factor at a time (or one time period at a time if the split factor is plotted as a chart axis).
-tscomp | Create a time series growth components chart, with time periods along the horizontal axis, vertical stacked bars showing growth components, and a line showing overall growth.  Widgets select one split factor category at a time.
-utils/ukons_lprod_to_csv.py | Extract data from ONS labour productivity datasets such as [Output per hour worked, UK](https://www.ons.gov.uk/economy/economicoutputandproductivity/productivitymeasures/datasets/outputperhourworkeduk), in a format suitable for use with `xplorts` charts.
+Script | Entry point | Description
+--- | --- | ---
+dblprod | xp-dblprod | Create a labour productivity dashboard, with three charts including: <ul><li>a lines chart showing levels of labour productivity, gross value added, and labour,</li> <li>a time series growth components chart showing cumulative growth in labour productivity, gross value added, and labour, and</li> <li>a snapshot growth components chart showing period-on-period growth in labour productivity, gross value added, and labour.</li>
+lines | xp-lines | Create a line chart showing several time series with a split factor.  Widgets select one split factor category at a time.
+scatter | xp-scatter | Create scatter chart showing one or more time series with a split factor.  Widgets select one split factor category at a time.
+snapcomp | xp-snapcomp | Create a snapshot growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal stacked bars showing growth components, and a line showing overall growth.  A widget selects one time period at a time.
+stacks | xp-stacks | Create stacked bar chart showing several data series with a split factor.  Widgets select one split factor at a time (or one time period at a time if the split factor is plotted as a chart axis).
+tscomp | xp-tscomp | Create a time series growth components chart, with time periods along the horizontal axis, vertical stacked bars showing growth components, and a line showing overall growth.  Widgets select one split factor category at a time.
+utils.ukons_lprod_to_csv |  | Extract data from ONS labour productivity datasets such as [Output per hour worked, UK](https://www.ons.gov.uk/economy/economicoutputandproductivity/productivitymeasures/datasets/outputperhourworkeduk), in a format suitable for use with `xplorts` charts.
 </details>
