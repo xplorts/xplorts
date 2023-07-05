@@ -4,20 +4,20 @@ Make standalone chart showing horizontal snapshot components and total.
 When run from the command line, reads data from a CSV file and
 creates an HTML document that displays snapshot
 components for one level of a split factor at a time.
-      
-    In the CSV file, the first row of data defines column names.  
+
+    In the CSV file, the first row of data defines column names.
     The file should include:
-        - a column of category names for the vertical chart axis, 
+        - a column of category names for the vertical chart axis,
         - a column of category names for the split factor
-        - a column of data totals at each level along the vertical axis, and 
+        - a column of data totals at each level along the vertical axis, and
         - one or more columns of value components for each total.
 
     An interactive chart is created, with widgets to select one of the
     split factor levels (from a pulldown list or a slider).  The chart plots
     value components as horizontal stacked bars with a marker for each total.
-    
-    The interactive chart is saved as an HTML file which requires 
-    a web browser to view, but does not need an active internet connection.  
+
+    The interactive chart is saved as an HTML file which requires
+    a web browser to view, but does not need an active internet connection.
     Once created, the HTML file does not require Python,
     so it is easy to share the interactive chart.
 
@@ -67,8 +67,8 @@ import yaml
 
 ## Imports from this package
 from xplorts.snapcomp import components_figure, link_widget_to_snapcomp_figure
-from xplorts.base import (iv_dv_figure, filter_widget, 
-                          set_output_file, 
+from xplorts.base import (iv_dv_figure, filter_widget,
+                          set_output_file,
                           unpack_data_varnames, variables_cmap)
 
 #%%
@@ -76,16 +76,16 @@ from xplorts.base import (iv_dv_figure, filter_widget,
 def _parse_args():
     """
     Parse command line arguments
-    
+
     Returns
     -------
     `argparse.Namespace` object
-    
+
     Examples
     --------
     args = _parse_args()
     data = pd.read_csv(args.datafile)
-    
+
     Resources
     ---------
     [argparse — Parser for command-line options, arguments and sub-commands](https://docs.python.org/3/library/argparse.html#dest)
@@ -95,7 +95,7 @@ def _parse_args():
         prog="python -m xplorts.snapcomp",
         description="Create interactive horizontal bar chart for snapshot components with a split factor"
     )
-    parser.add_argument("datafile", 
+    parser.add_argument("datafile",
                         help="File (CSV) with data series and split factor")
     parser.add_argument("-b", "--by", type=str,
                         help="Factor variable for splits")
@@ -105,24 +105,24 @@ def _parse_args():
 
     parser.add_argument("-m", "--markers", type=str,
                         help="Variable to show as marker points")
-    parser.add_argument("-x", "--bars", 
+    parser.add_argument("-x", "--bars",
                         nargs="+", type=str,
                         help="Variables to show as horizontal stacked bars")
 
-    parser.add_argument("-L", "--last", action="store_true", 
+    parser.add_argument("-L", "--last", action="store_true",
                         help="Initial chart shows last level of `by` variable")
 
-    parser.add_argument("-g", "--args", 
+    parser.add_argument("-g", "--args",
                         type=str,
                         help="""Keyword arguments.  YAML mapping of mappings.  The
-                            keys 'lines' and 'bars' 
+                            keys 'lines' and 'bars'
                             can provide keyword arguments to pass to
                             `components_figure()`.""")
 
-    parser.add_argument("-t", "--save", type=str, 
+    parser.add_argument("-t", "--save", type=str,
                         help="Interactive .html to save, if different from the datafile base")
 
-    parser.add_argument("-s", "--show", action="store_true", 
+    parser.add_argument("-s", "--show", action="store_true",
                         help="Show interactive .html")
 
     args = parser.parse_args()
@@ -134,31 +134,31 @@ def _parse_args():
 #%%
 
 def main():
-    # Running from command line.    
+    # Running from command line.
     args = _parse_args()
 
     data = pd.read_csv(args.datafile, dtype=str)
-    
-    title = "tscomp: " + Path(args.datafile).stem
-    
+
+    title = "snapcomp: " + Path(args.datafile).stem
+
     # Configure output file for interactive html.
     set_output_file(
         args.save or args.datafile,
         title = title
     )
-    
+
     # Unpack args specifying which data columns to use.
     varnames = unpack_data_varnames(
         args,
         ["iv", "by", "markers", "bars"],
         data.columns)
-    
+
     # Make list of dependent variables for bars plus markers, if any.
     markervar = varnames["markers"]
     dependent_variables = varnames["bars"].copy()
     if markervar is not None:
         dependent_variables.insert(0, markervar)
-    
+
     # Convert str to float so we can plot the data.
     data[dependent_variables] = data[dependent_variables].astype(float)
 
@@ -170,7 +170,7 @@ def main():
         iv_data = reversed(data[varnames["iv"]].unique()),
         iv_axis = "y",
     )
-    
+
     if markervar is None:
         scatter_args = {}
     else:
@@ -178,7 +178,7 @@ def main():
         scatter_args = args.args.pop(
             "scatter_args",
             {"color": default_color_map[markervar]})
-        
+
     # Use specified bar_args, else defaults.
     bar_args = args.args.pop(
         "bar_args",
@@ -209,7 +209,7 @@ def main():
         [widget],
         [fig]
     ])
-    
+
     if args.show:
         show(app)  # Save file and display in web browser.
     else:
