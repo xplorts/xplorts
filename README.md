@@ -67,6 +67,7 @@ The labour productivity explorer demonstrates these features:
 - A grouped multi-line chart shows a set of related lines for one split level at a time, like time series for productivity, gross value added, and hours worked for a particular industry.<br> ![Thumbnail screenshot of lines chart](docs/png/xplor_lprod_lines_thumbnail_large.png)
 - A time series components chart shows a set of stacked bars in combination with a totals line, for one split level at a time, like cumulative growth time series for gross value added, hours worked (sign reversed), and productivity for a particular industry.<br> ![Thumbnail screenshot of time series growth components chart](docs/png/xplor_lprod_tscomp_thumbnail_large.png)
 - A snapshot growth components chart shows a set of stacked bars in combination with markers showing total growth, as a function of a categorical factor, like growth for gross value added and hours worked (sign reversed) by industry, along with growth in productivity, for a selectable time period.<br> ![Thumbnail screenshot of snapshot growth components chart](docs/png/xplor_lprod_snapcomp_thumbnail_large.png)
+- A heatmap chart shows data values as a function of a categorical split variable across time.
 - Drop-down list and slider widgets provide interactive selection of a categorical split level or snapshot time period to show. Static screenshots are shown here, but check out the interactive sample data explorer at the link above.<br> ![Screenshot of widgets to select industry](docs/png/slideselect_industry.png) ![Screenshot of widgets to select date](docs/png/slideselect_date.png)
 - Hover tool displays data values at the cursor location.
 - Chart tools include box zoom, wheel zoom, pan, and save to file.
@@ -104,6 +105,7 @@ Module | Description
 base | Miscellaneous helper functions and classes.
 dblprod | Modify a Bokeh Figure by adding charts to show labour productivity levels or growth components.
 ghostbokeh | Define an abstract base class to a build pseudo-subclass of a Bokeh class.
+heatmap | Functions to create a heatmap of data values as a function of horizontal and vertical categorical variables.
 lines | Modify a Bokeh Figure by adding line charts to show several time series with a split factor.
 scatter | Modify a Bokeh Figure by adding scatter charts to show one or more categorical series with a split factor.
 slideselect | Defines a class combining select and slider widgets, with support for javascript linking to other objects.
@@ -186,6 +188,7 @@ Or
 Script | Entry point | Description
 --- | --- | ---
 dblprod | xp-dblprod | Create a labour productivity dashboard, with three charts including: <ul><li>a lines chart showing levels of labour productivity, gross value added, and labour,</li> <li>a time series growth components chart showing cumulative growth in labour productivity, gross value added, and labour, and</li> <li>a snapshot growth components chart showing period-on-period growth in labour productivity, gross value added, and labour.</li>
+heatmap | xp-heatmap | Create a heatmap of values as a function of two categorical variables.
 lines | xp-lines | Create a line chart showing several time series with a split factor.  Widgets select one split factor category at a time.
 scatter | xp-scatter | Create scatter chart showing one or more time series with a split factor.  Widgets select one split factor category at a time.
 snapcomp | xp-snapcomp | Create a snapshot growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal stacked bars showing growth components, and a line showing overall growth.  A widget selects one time period at a time.
