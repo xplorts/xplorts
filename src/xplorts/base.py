@@ -40,7 +40,7 @@ variables_cmap
 
 from bokeh import palettes
 from bokeh.io import output_file
-from bokeh.models import (CDSView, ColumnDataSource, CustomJS, GroupFilter, FactorRange, 
+from bokeh.models import (CDSView, ColumnDataSource, CustomJS, GroupFilter, FactorRange,
                           HoverTool, Legend, LegendItem)
 from bokeh.models import formatters as bk_formatters
 #from bokeh.models.formatters import FuncTickFormatter
@@ -62,8 +62,8 @@ from xplorts.slideselect import SlideSelect
 
 #%%
 
-# Use CustomJSTickFormatter for newer bokeh, or 
-# FuncTickFormatter for older bokeh.    
+# Use CustomJSTickFormatter for newer bokeh, or
+# FuncTickFormatter for older bokeh.
 def _custom_tick_formatter(code):
     try:
         cls = bk_formatters.CustomJSTickFormatter
@@ -72,12 +72,27 @@ def _custom_tick_formatter(code):
     return cls(code=code)
 
 
+
+# Tick formatter to suppress most lowest level categorical tick labels.
+# If tick labels are tuples, higher levels will be displayed
+# as normal.
+tf_margins_only = _custom_tick_formatter(
+    code="""
+    if ((index == 0) | (index == ticks.length - 1)) {
+        return tick;
+    } else {
+        return '';
+    }
+    """
+)
+
+
 #%%
 
 def add_hover_tool(fig, renderers, *tooltips, simplify=True, **kwargs):
     """
     Add a hover tool to a Bokeh figure, for given renderers
-    
+
     Parameters
     ----------
     fig : Bokeh Figure
@@ -100,12 +115,12 @@ def add_hover_tool(fig, renderers, *tooltips, simplify=True, **kwargs):
     if isinstance(tooltips, dict):
         # Convert mapping to list of (label, value) tuples.
         tooltips = tooltips.items()
-    
+
     tooltips = list(tooltips)  # Coerce to list from *args tuple, or .items().
     if len(tooltips) == 1 and simplify:
         # Just use the tooltip string without a tabular label.
         _, tooltips = tooltips[0]
-    
+
     hover_tool = HoverTool(
         tooltips=tooltips,
         renderers=renderers,
@@ -119,9 +134,9 @@ def add_hover_tool(fig, renderers, *tooltips, simplify=True, **kwargs):
 def extend_legend_items(fig, renderers=None, items=None, **kwargs):
     """
     Add legend items to figure
-    
+
     Extends the legend items of a Bokeh figure.
-    
+
     Parameters
     ----------
     fig : Bokeh Figure
@@ -130,19 +145,19 @@ def extend_legend_items(fig, renderers=None, items=None, **kwargs):
         Mapping of labels to renderers, to create `LegendItem`
         objects.  Each value should be a renderer or list of renderers.
         Either `renderers` or `items` must be specified.
-        The `renderers` parameter is ignored if `items` are given.  
+        The `renderers` parameter is ignored if `items` are given.
     items : list of LegendItem
         Will be added to the figure's legend items.
         Either `renderers` or `items` must be specified.
     kwargs : mapping, optional
         Keyword arguments passed to `fig.Legend` if
         `fig` does not already have a legend.
-    
+
     Raises
     ------
     ValueError
         If neither renderers nor items is given.
-        
+
     Example
     -------
     from bokeh.io import show
@@ -155,21 +170,21 @@ def extend_legend_items(fig, renderers=None, items=None, **kwargs):
     extend_legend_items(fig, {"x": plot})
     show(fig)
     """
-    
+
     if renderers is None and items is None:
         raise ValueError("either renderers or items required")
-        
-    if items is None and renderers is not None:        
+
+    if items is None and renderers is not None:
         # Make a legend item for each renderer.
         items = [
             # Include legend item for each factor level.
             LegendItem(
-                label=var, 
-                renderers=renderer if isinstance(renderer, list) else [renderer], 
+                label=var,
+                renderers=renderer if isinstance(renderer, list) else [renderer],
             ) \
             for var, renderer in renderers.items()
         ]
-    
+
     fig.legend.items.extend(items)
     return None
 
@@ -177,7 +192,7 @@ def extend_legend_items(fig, renderers=None, items=None, **kwargs):
 def factor_filters(by, source=None, name_template="filter"):
     """
     Return list of GroupFilter objects for specified variables
-    
+
     Arguments
     ---------
     by: str, sequence, or dict
@@ -194,12 +209,12 @@ def factor_filters(by, source=None, name_template="filter"):
         assigning names of the form "filter_X", "filter_Y",
         and so forth, where "X" and "Y" are among the `by`
         variables.
-    
+
     Returns
     -------
     A list of filters that can be used with CDSView tofilter
     a `ColumnDataSource` on values of the `by` variables.
-    
+
     Examples
     --------
     data = pd.DataFrame.from_records(
@@ -212,15 +227,15 @@ def factor_filters(by, source=None, name_template="filter"):
     cds = ColumnDataSource(data)
     filters = factor_filters("industry", source=cds)
     view = CDSView(source=cds, filters=filters)
-    
+
     # Explicit initial filter value.
     filters = factor_filters({"industry": "B"})
     """
-    
+
     if isinstance(by, str):
         # Wrap in list, for convenience.
         by = [by]
-    
+
     if not isinstance(by, dict):
         # Map `by` variables to initial values to use in filter.
         is_cds = isinstance(source, ColumnDataSource)
@@ -234,7 +249,7 @@ def factor_filters(by, source=None, name_template="filter"):
             group=initial,
             name="_".join([name_template, var])
         ) \
-        for var, initial in by.items() 
+        for var, initial in by.items()
     ]
     return filters
 
@@ -242,7 +257,7 @@ def factor_filters(by, source=None, name_template="filter"):
 def factor_view(source, by, **kwargs):
     """
     Return a CDSView to filter source on specified variables
-    
+
     Parameters
     ---------
     source : ColumnDataSource
@@ -251,11 +266,11 @@ def factor_view(source, by, **kwargs):
         Categorical variables to filter by.
     kwargs : mapping, optional
         Keyword arguments passed into `factor_filter()`.
-    
+
     Returns
     -------
     A CSDView that filters `source` on values of the `by` variables.
-    
+
     Examples
     --------
     data = pd.DataFrame.from_records(
@@ -268,7 +283,7 @@ def factor_view(source, by, **kwargs):
     cds = ColumnDataSource(data)
     view = factor_view(cds, "category")
     """
-    
+
     assert isinstance(source, ColumnDataSource), f"source must be ColumnDataSource, not {type(source)}"
 
     # Get list of one or more filters.
@@ -291,12 +306,12 @@ def factor_view(source, by, **kwargs):
                 else:
                     # Combine multiple filters with logical `and`.
                     filter = functools.reduce(operator.and_, filters)
-                    
+
                 view = CDSView(filter=filter)
             else:
                 # No filters to apply.
                 view = CDSView()
-        
+
     return view
 
 
@@ -328,13 +343,13 @@ def iv_dv_figure(
     **kwargs
 ):
     """
-    Return default figure options, updated with optional keywords
-    
+    Make empty bokeh Figure with one categorical axis and one continuous axis
+
     Parameters
     ----------
     iv_data: array or series
         Independent variable against which data will be plotted.  If the
-        data provided satisfy pandas `is_datetime()`, the relevant axis type 
+        data provided satisfy pandas `is_datetime()`, the relevant axis type
         will be "datetime".  Otherwise the default axis type will be used,
         with categorical values and a factor range determined by the unique
         data values.  For regular time periods like annual, quarterly, or
@@ -349,7 +364,7 @@ def iv_dv_figure(
     -------
     Bokeh `Figure`.
     """
-    
+
     # Default figure options.
     fopts = dict(
         background_fill_color = "#fafafa",
@@ -373,20 +388,11 @@ def iv_dv_figure(
     # Fold in explicit options to override others.
     fopts.update(kwargs)
     fig = figure(**fopts)
-    
+
     if suppress_factors:
         # Suppress most lowest level categorical tick labels.
         # If tick labels are tuples, higher levels will be displayed
         # as normal.
-        tf_margins_only = _custom_tick_formatter(
-            code="""
-            if ((index == 0) | (index == ticks.length - 1)) {
-                return tick;
-            } else {
-                return '';
-            }
-            """
-        )
         axis = fig.xaxis if iv_axis == "x" else fig.yaxis
         axis[0].formatter = tf_margins_only
 
@@ -396,16 +402,16 @@ def iv_dv_figure(
                 location = "top_left",
                 background_fill_alpha = 0.0)  # Transparent.
         fig.add_layout(legend, place=legend_place)
-    
+
     fig.toolbar.logo = None
-    
+
     return fig
 
 
 def link_widgets_to_groupfilters(widgets, source, filter):
     """
     Link values of widgets to corresponding GroupFilter objects
-    
+
     Parameters
     ----------
     widgets : Bokeh widget or list of widgets
@@ -420,7 +426,7 @@ def link_widgets_to_groupfilters(widgets, source, filter):
         `value` of the corresponding widget changes, and `source` will emit
         a change signal whenever the `group` property of a filter changes.  If
         there are more filters than widgets, excess filters are ignored.
-    
+
     Examples
     --------
     from bokeh.models import ColumnDataSource
@@ -430,43 +436,43 @@ def link_widgets_to_groupfilters(widgets, source, filter):
     view_by_factor = factor_view(source, "industry")
     widget = SlideSelect(options=["A", "B"],
                          name="industry_filter")  # Show this in a layout.
-    link_widgets_to_groupfilters(widget, 
+    link_widgets_to_groupfilters(widget,
                                  source=source,
                                  filter=view_by_factor.filters)
     """
-    
+
     # Wrap singleton widget or filter, for convenience.
     if not isinstance(widgets, (list, tuple)):
         widgets = [widgets]
     if not isinstance(filter, (list, tuple)):
         filter = [filter]
-        
+
     for widget, filt in zip(widgets, filter):
         # Link widget to the GroupFilter.
         assert isinstance(filt, GroupFilter)
         widget.js_link("value", other=filt, other_attr="group")
 
-        # Signal change in data when filter `group` attribute changes, 
+        # Signal change in data when filter `group` attribute changes,
         # so chart refreshes.
         filt.js_on_change(
             "group",
             CustomJS(args=dict(source=source),
                      code="""
                          source.change.emit()
-                     """))    
+                     """))
 
 
 def set_output_file(outfile, title):
     """
     Set Bokeh output file for standalone application
-    
+
     Filename suffix is coerced to 'html'
-    
+
     Examples
     --------
     set_output_file(args.save or args.datafile, "OPH by industry")
     """
-    
+
     outfile = Path(outfile).with_suffix(".html").as_posix()
     output_file(outfile, title=title, mode='inline')
 
@@ -475,7 +481,7 @@ def unpack_data_varnames(args, arg_names, defaults=None):
     """
     Look up command line arguments or defaults
     """
-    
+
     # Assemble CL arguments, which default to None.
     mapping = {arg: getattr(args, arg) for arg in arg_names}
     if (defaults is not None
@@ -491,31 +497,31 @@ def unpack_data_varnames(args, arg_names, defaults=None):
 def variables_cmap(variables, palette):
     """
     Map variables to colors
-    
+
     If there are more variables than colors in the palette,
     colors are recycled.
-    
+
     Parameters
     ----------
     variables: str or list[str]
         Variable name or list of names.
     palette: str or array
         Named palette from Bokeh.palettes, or array of colors.
-    
+
     Returns
     -------
     dict mapping variable names to colors.
     """
-    
+
     if isinstance(variables, str):
         # Wrap simple string in a list, for convenience.
         variables = [variables]
     n_data_series = len(variables)
-    
+
     if isinstance(palette, str):
         # Access named palette from bokeh.palettes.
         palette = getattr(palettes, palette)
-    
+
     if isinstance(palette, dict):
         # Extract color palette from palette dict, by number of colors needed.
         last_palette = [palette.values()][-1]

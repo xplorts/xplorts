@@ -2,7 +2,7 @@
 The xplorts ("explore ts") package contains tools to make
 standalone interactive HTML charts to explore time series datasets.
 
-Once created, the HTML documents can be used with any web browser. 
+Once created, the HTML documents can be used with any web browser.
 They do not need an active internet connection.
 
 Generally the tools work with annual, quarterly, or monthly time series
@@ -13,14 +13,14 @@ The interactive charts provide widgets to select different subsets of
 data for display.  A hover tool displays detail for the data under the
 cursor.  Chart tools support zoom and plot save.
 
-xplorts uses the [Bokeh](https://bokeh.org) interactive visualization 
+xplorts uses the [Bokeh](https://bokeh.org) interactive visualization
 library.
 
 Command line interface entrypoints
 ----------------------------------
 dblprod
     Create a labour productivity dashboard, with three charts including:
-        - a lines chart showing levels of labour productivity, gross value 
+        - a lines chart showing levels of labour productivity, gross value
             added, and labour,
         - a time series growth components chart showing cumulative growth
             in labour productivity, gross value added, and labour, and
@@ -30,14 +30,19 @@ dblprod
 lines
     Create a line chart showing several time series with a split
     factor.  Widgets select one split factor category at a time.
-    
+
+heatmap
+    Create a heatmap showing a dependent variable as a function of
+    two categorical variables (typically a date variable and a split
+    factor).
+
 scatter
     Create scatter chart showing one or more time series with a split
     factor.  Widgets select one split factor category at a time.
 
 snapcomp
     Create a snapshot growth components chart, with a categorical
-    vertical axis showing levels of a split factor, horizontal stacked 
+    vertical axis showing levels of a split factor, horizontal stacked
     bars showing growth components, and markers showing overall growth
     for each stack of bars.  A widget selects one time period at a time.
 
@@ -64,6 +69,10 @@ base
 ghostbokeh
     Define an abstract base class to a build pseudo-subclass of a Bokeh class.
 
+heatmap
+    Functions to create a heatmap showing data values as a function of
+    horizontal and vertical categorical variables.
+
 lines
     Modify a Bokeh Figure by adding line charts to show several time
     series with a split factor.
@@ -73,23 +82,23 @@ scatter
     categorical series with a split factor.
 
 slideselect
-    Defines a class combining select and slider widgets, with support for 
+    Defines a class combining select and slider widgets, with support for
     javascript linking to other objects.
 
 snapcomp
-    Modify a Bokeh Figure by adding a snapshot growth components chart, with a 
-    categorical vertical axis showing levels of a split factor, horizontal 
+    Modify a Bokeh Figure by adding a snapshot growth components chart, with a
+    categorical vertical axis showing levels of a split factor, horizontal
     stacked bars showing growth components, and markers showing overall growth
-    for each stack of bars.  
+    for each stack of bars.
 
 stacks
-    Modify a Bokeh Figure by adding a horizontal or vertical stacked bar 
+    Modify a Bokeh Figure by adding a horizontal or vertical stacked bar
     chart showing several data series with a split factor.
 
 tscomp
-    Modify a Bokeh Figure by adding a time series growth components chart, with 
-    a categorical vertical axis showing levels of a split factor, horizontal 
-    stacked bars showing growth components, and a line showing overall growth.  
+    Modify a Bokeh Figure by adding a time series growth components chart, with
+    a categorical vertical axis showing levels of a split factor, horizontal
+    stacked bars showing growth components, and a line showing overall growth.
 
 
 Subpackages (not exported)
@@ -102,7 +111,7 @@ utils
     xplorts charts.
 """
 
-from . import (base, dutils, ghostbokeh, 
+from . import (base, dutils, ghostbokeh, heatmap,
                slideselect)
 # Export API modules within sub-packages.
 from .lines import lines
@@ -111,10 +120,11 @@ from .snapcomp import snapcomp
 from .stacks import stacks
 from .tscomp import tscomp
 
-# Suppress code analysis warnings of unused imports; 
+# Suppress code analysis warnings of unused imports;
 #   see https://stackoverflow.com/a/31079085/16327476.
-__all__ = ["base", "dutils", "ghostbokeh", 
+__all__ = ["base", "dutils", "ghostbokeh",
+           "heatmap",
            "lines", "scatter",
-           "slideselect", 
+           "slideselect",
            "snapcomp", "stacks",
            "tscomp"]
