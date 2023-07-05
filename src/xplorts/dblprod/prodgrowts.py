@@ -22,11 +22,11 @@ from ..tscomp import link_widget_to_tscomp_figure, ts_components_figure
 DATE_THRESHOLD = 40
 
 
-def figprodgrowts(data, 
-                  widget=None, 
+def figprodgrowts(data,
+                  widget=None,
                   varnames=None,
-                  date=None, 
-                  by=None, 
+                  date=None,
+                  by=None,
                   lprod=None,
                   gva=None,
                   labour=None,
@@ -35,7 +35,7 @@ def figprodgrowts(data,
                   **kwargs):
     """
     Make interactive time series vertical bar chart of productivity growth components
-    
+
     Parameters
     ----------
     data : DataFrame
@@ -44,7 +44,7 @@ def figprodgrowts(data,
         The `value` attribute will be linked to the chart to make visible one
         value of the `by` variable.
     varnames : dict, optional
-        Mapping to specify column names for 'by', 'date', and the three 
+        Mapping to specify column names for 'by', 'date', and the three
         individual data variables 'lprod', 'gva', and 'labour'.
     date : str, optional
         Name of column containing time series dates to plot along the horizontal
@@ -57,12 +57,12 @@ def figprodgrowts(data,
         series line.  If not given, the value is looked up in `varnames`.
     kwargs : mapping
         Keyword arguments passed to `iv_dv_figure()`.
-    
+
     Returns
     -------
     Bokeh figure.
     """
-    
+
     if date is None:
         date = varnames["date"]
     if by is None:
@@ -73,9 +73,9 @@ def figprodgrowts(data,
         gva = varnames["gva"]
     if labour is None:
         labour = varnames["labour"]
-    
+
     # Transform monthly and quarterly dates to nested categories.
-    datevar = varnames["date"]
+    datevar = date
     data_local = data.copy()
     data_local["_date_factor"] = date_tuples(data_local[datevar],
                                              length_threshold=DATE_THRESHOLD)
@@ -83,11 +83,11 @@ def figprodgrowts(data,
     # Prepare to suppress most quarters or months on axis if lots of them.
     suppress_factors = (isinstance(data_local["_date_factor"][0], tuple)
                         and len(data_local["_date_factor"].unique()) > DATE_THRESHOLD)
-    
+
     # Reverse sign of denominator variable (into new dataframe).
     labour_reversed = labour + reverse_suffix
     data_local = data_local.assign(**{labour_reversed: -data_local[labour]})
-    
+
     bar_variables = [gva, labour_reversed]
 
     ## Show time series growth components (bars) and total (line).
@@ -100,7 +100,7 @@ def figprodgrowts(data,
         y_axis_label = kwargs.pop("y_axis_label", "Growth (percent)"),
         **kwargs
     )
-    
+
     if color_map is None:
         palette = palettes.Category20_3[::-1]
     else:
