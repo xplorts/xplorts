@@ -17,6 +17,9 @@ date_tuples
 dict_fill
     Map keys to values, recycling values as necessary.
 
+find_in_metadata
+    Return first item that is a substring of metadata.
+
 growth_pct_from
     Percentage growth for a series relative to a baseline value.
 
@@ -28,6 +31,9 @@ index_to
 
 pairwise
     Stand-in for future `itertools.pairwise()` if `itertools` is old.
+
+read_sheet
+    Read a two-dimensional data table from an Excel file.
 """
 
 #%%
@@ -169,6 +175,40 @@ def dict_fill(keys, values):
     """
 
     return dict(zip(keys, cycle(values)))
+
+
+def find_in_metadata(items, metadata, /):
+    """
+    Return first item that is a substring of metadata
+
+    Parameters
+    ----------
+    items : iterable
+        Candidate strings that might be substrings of `metadata`.
+    metadata : str
+        String to search.
+
+    Returns
+    -------
+    item : str, None
+        First item that is a substring of `metadata`.  If no item is found,
+        return None.
+
+    Examples
+    --------
+    item_list = ["one", "two"]
+    find_in_metadata(item_list, "Table for two")
+    # "two"
+
+    find_in_metadata(itemlist, "Two by two, one at a time")
+    # "one"
+
+    find_in_metadata(item_list, "The rain in Spain")
+    # None
+    """
+    item = next(iter([item for item in items if item in metadata]),
+               None)
+    return item
 
 
 def growth_pct_from(data, baseline):
@@ -359,3 +399,67 @@ def index_to(data, baseline, to=100):
     """
 
     return data / baseline * to
+
+
+def read_sheet(io, sheet_name, sheet_parser,
+               name=None,
+               n_digits=4, **kwargs):
+    """
+    Read a two-dimensional data table from an Excel file
+
+    Parameters
+    ----------
+    io : as for pandas `read_excel`
+        Filename.
+    sheet_name : str
+        Worksheet to read.
+    sheet_parser : callable
+        Function to use for parsing a raw dataframe of worksheet content as
+        strings.  Should accept one positional argument, a dataframe, and
+        a keyword argument `name`.  Should return one of:
+        - Dataframe in wide format, with `frame.index.name` and
+          `frame.columns.name` defined.  The index should contain strings.
+           Other columns should contain numbers formatted as strings.
+        - Dataframe in long format with a single column named
+          `value_name`, and a multi-index of two levels.  The `value_name`
+          column should contain numbers formatted as strings.  The index
+          levels should contain strings.
+    name : str, optional
+        Name to assign to data values.  Typically reflects the
+        content of the table, e.g. "gva", "ulc", etc.  If not specified,
+        defaults to the name attached to the parsed dataframe, or 'value'.
+    n_digits : int, None
+        Number of data digits to keep.  Defaults to 4, making values
+        like "102.1234" or "0.1234".  If None, all digits are kept.
+    kwargs : mapping
+        Additional keyword arguments are passed to `read_excel`.
+
+    Returns
+    -------
+    Dataframe with one
+    three columns, "date", "industry"
+    and `value_name`.
+    """
+
+    print(f"reading {name or 'value'} from {sheet_name}")
+    df_sheet = pd.read_excel(io, sheet_name=sheet_name,
+                         #engine="openpyxl",
+                         header=None, dtype=str, **kwargs)
+
+    df_data = sheet_parser(df_sheet, name=name)
+    if len(df_data.index.names) == 1:
+        # Reshape from wide to long format.
+        value_name = df_data.name or name or "value"
+        df_name = df_data.name
+        df_data = df_data.melt(value_name=value_name,
+                               ignore_index=False,
+                               )
+        df_data.name = df_name
+        var_name = df_data.columns[0]
+        df_data.set_index([var_name], append=True, inplace=True)
+
+    if n_digits is not None:
+        # Round off the data to reduce size a little.
+        # df_data[name] = df_data[name_parsed].astype(float).round(n_digits).astype(str)
+        df_data.iloc[:, 0] = df_data.iloc[:, 0].astype(float).round(n_digits).astype(str)
+    return df_data
