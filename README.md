@@ -103,6 +103,7 @@ xplorts.slideselect?
 Module | Description
 --- | ---
 base | Miscellaneous helper functions and classes.
+dutils | Miscellaneous data manipulation helpers.
 dblprod | Modify a Bokeh Figure by adding charts to show labour productivity levels or growth components.
 ghostbokeh | Define an abstract base class to a build pseudo-subclass of a Bokeh class.
 heatmap | Functions to create a heatmap of data values as a function of horizontal and vertical categorical variables.
@@ -194,5 +195,7 @@ scatter | xp-scatter | Create scatter chart showing one or more time series with
 snapcomp | xp-snapcomp | Create a snapshot growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal stacked bars showing growth components, and a line showing overall growth.  A widget selects one time period at a time.
 stacks | xp-stacks | Create stacked bar chart showing several data series with a split factor.  Widgets select one split factor at a time (or one time period at a time if the split factor is plotted as a chart axis).
 tscomp | xp-tscomp | Create a time series growth components chart, with time periods along the horizontal axis, vertical stacked bars showing growth components, and a line showing overall growth.  Widgets select one split factor category at a time.
+utils.ukons_lcli_to_csv |  | Extract data from ONS [labour costs and labour income dataset](https://www.ons.gov.uk/economy/economicoutputandproductivity/productivitymeasures/datasets/labourcostsandlabourshare), in a format suitable for use with `xplorts` charts.
 utils.ukons_lprod_to_csv |  | Extract data from ONS labour productivity datasets such as [Output per hour worked, UK](https://www.ons.gov.uk/economy/economicoutputandproductivity/productivitymeasures/datasets/outputperhourworkeduk), in a format suitable for use with `xplorts` charts.
+utils.ukons_psp_to_csv |  | Extract data from ONS dataset [Public service productivity estimates: total public service](https://www.ons.gov.uk/economy/economicoutputandproductivity/publicservicesproductivity/datasets/publicserviceproductivityestimatestotalpublicservice), in a format suitable for use with `xplorts` charts.
 </details>
