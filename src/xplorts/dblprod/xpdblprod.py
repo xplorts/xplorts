@@ -256,14 +256,6 @@ def main():
             },
         **args.args["growth_snapshot"])
 
-    # fig_growth_snapshot = figprodgrowsnap(
-    #     df_growth,
-    #     varnames=varnames,
-    #     color_map=color_map,
-    #     widget=date_widget,
-    #     height=600, width=300,
-    #     **args.args["growth_snapshot"])
-
     # Put level and growth charts, with widgets, on a tab.
     ts_charts = column(split_widget, fig_index_lines, fig_ts_growth)
     snapshot = column(date_widget, fig_growth_snapshot)
