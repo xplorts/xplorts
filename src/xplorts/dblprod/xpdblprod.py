@@ -75,9 +75,11 @@ import yaml
 from ..base import (filter_widget,
                           set_output_file, unpack_data_varnames,
                           variables_cmap)
-from ..dutils import growth_vars
+from ..growthcomps import growth_vars, GrowthComponent, SignReversedComponent
 from ..heatmap import figheatmap
-from . import figprodgrowsnap, figprodlines, figprodgrowts
+from ..lines.xplines import figlines
+from ..tscomp.xptscomp import figtscomp
+from ..snapcomp.xpsnapcomp import figsnapcomp
 
 #%%
 
@@ -160,6 +162,9 @@ def main():
 
     datevar = varnames["date"]
     dependent_variables = [varnames[var] for var in ("lprod", "gva", "labour")]
+    line_dash = ["solid", "solid", "dashed"]
+    color_map = variables_cmap(["labour", "gva", "lprod"],
+                               palettes.Category20_3)
 
     title = "xplor lprod: " + Path(args.datafile).stem
 
@@ -169,13 +174,8 @@ def main():
         title = title
     )
 
-    # Make palettes.
-    color_map = variables_cmap(["labour", "gva", "lprod"],
-                               palettes.Category20_3)
-
     # Convert str to float so we can plot the data.
     data[dependent_variables] = data[dependent_variables].astype(float)
-
 
     # Widget for `by`.
     split_widget = filter_widget(data[varnames["by"]], title=varnames["by"])
@@ -183,36 +183,55 @@ def main():
     # Widget for date.
     date_widget = filter_widget(data[datevar], start_value="last")
 
-    fig_index_lines = figprodlines(
-        data,
-        varnames=varnames,
-        color_map=color_map,
-        widget=split_widget,
-        height=300, width=600,
-        **args.args["lines"])
+    fig_index_lines = figlines(data,
+                    widget=split_widget,
+                    date=varnames["date"],
+                    by=varnames["by"],
+                    data_variables=dependent_variables,
+                    color_map=color_map,
+                    line_dash=line_dash)
+
 
 
     # Calculate cumulative growth.
+    component_columns = [
+        GrowthComponent(varnames["gva"]),
+        SignReversedComponent(varnames["labour"]),
+        ]
+    # Map colors for growth components to the colors for corresponding levels.
+    color_map.update({c.cname: color_map[c.name] for c in component_columns
+                      if c.cname != c.name})
+
+    growth_columns = [
+        varnames["lprod"],
+        *component_columns
+        ]
     df_growth_cum = growth_vars(data,
                             date_var=datevar,
-                            columns=dependent_variables,
+                            columns=growth_columns,
                             by=varnames["by"],
                             baseline="first",
                            )
 
-    fig_ts_growth = figprodgrowts(
-        df_growth_cum,
-        varnames=varnames,
-        color_map=color_map,
-        widget=split_widget,
-        height=300, width=600,
-        **args.args["growth_series"])
+    fig_ts_growth = figtscomp(df_growth_cum,
+                date=varnames["date"],
+                by=varnames["by"],
+                bars = [c.cname for c in component_columns],
+                line=varnames["lprod"],
+                widget=split_widget,
+                iv_dv_args = {
+                    "height": 300,
+                    "width": 600,
+                    },
+                color_map = color_map,
+                **args.args["growth_series"],
+                )
 
 
     # Calculate period-on-period growth.
     df_growth = growth_vars(data,
                             date_var=datevar,
-                            columns=dependent_variables,
+                            columns=growth_columns,
                             by=varnames["by"],
                             periods=1,
                            )
@@ -223,13 +242,27 @@ def main():
         textwrap.shorten, args=(15,), placeholder='..'
     )
 
-    fig_growth_snapshot = figprodgrowsnap(
+    fig_growth_snapshot = figsnapcomp(
         df_growth,
-        varnames=varnames,
+        by=varnames["by"],
+        date=varnames["date"],
+        bars = [c.cname for c in component_columns],
+        markers=varnames["lprod"],
         color_map=color_map,
         widget=date_widget,
-        height=600, width=300,
+        iv_dv_args = {
+            "height": 600,
+            "width": 300,
+            },
         **args.args["growth_snapshot"])
+
+    # fig_growth_snapshot = figprodgrowsnap(
+    #     df_growth,
+    #     varnames=varnames,
+    #     color_map=color_map,
+    #     widget=date_widget,
+    #     height=600, width=300,
+    #     **args.args["growth_snapshot"])
 
     # Put level and growth charts, with widgets, on a tab.
     ts_charts = column(split_widget, fig_index_lines, fig_ts_growth)
