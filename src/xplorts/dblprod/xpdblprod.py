@@ -77,9 +77,9 @@ from ..base import (filter_widget,
                           variables_cmap)
 from ..growthcomps import growth_vars, GrowthComponent, SignReversedComponent
 from ..heatmap import figheatmap
-from ..lines.xplines import figlines
-from ..tscomp.xptscomp import figtscomp
-from ..snapcomp.xpsnapcomp import figsnapcomp
+from ..lines import figlines
+from ..tscomp import figtscomp
+from ..snapcomp import figsnapcomp
 
 #%%
 
