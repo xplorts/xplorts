@@ -1,16 +1,19 @@
 """
-Unit tests for xplorts.snapcomp
+Unit tests for module dashboard
+
+If run as a script, the tests are run
 
 @author: Todd Bailey
 """
 
-MODULE_NAME = "xplorts.snapcomp"
-OPTIONS = "-b industry -d date -m lprod -x gva labour -L"
+MODULE_NAME = "xplorts.dashboard"
+OPTIONS = "-d date -y lprod -c gva --c labour -1 -b industry"
 DATA = "oph annual by section.csv"
 
-def test_snapcomp(helper_class, show=False):
+
+def test_dblprod(helper_class, show=False):
     """
-    Run script `SCRIPT_NAME` with data
+    Run module `MODULE_NAME` with data
     """
     helpers = helper_class(__file__)
     return_code = helpers.run_script(module=MODULE_NAME,
@@ -26,4 +29,4 @@ if __name__ == "__main__":
     from conftest import Helpers
 
     # Run the test function, showing the figure.
-    test_snapcomp(Helpers, show=True)
+    test_dblprod(Helpers, show=True)
