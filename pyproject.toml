@@ -27,6 +27,7 @@ classifiers = [
 ]
 
 [project.scripts]
+xp-dashboard = "xplorts.dblprod.xpdashboard:main"
 xp-dblprod = "xplorts.dblprod.xpdblprod:main"
 xp-heatmap = "xplorts.heatmap.xpheatmap:main"
 xp-lines = "xplorts.lines.xplines:main"
