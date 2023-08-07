@@ -17,5 +17,6 @@ Command line interface
 
 # Export names from .tscomp.tscomp.
 from .tscomp import link_widget_to_tscomp_figure, ts_components_figure
+from .xptscomp import figtscomp
 
-__all__ = ["link_widget_to_tscomp_figure", "ts_components_figure"]
+__all__ = ["figtscomp", "link_widget_to_tscomp_figure", "ts_components_figure"]

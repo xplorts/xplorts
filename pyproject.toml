@@ -4,9 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "xplorts"
-version = "0.7"
+version = "0.8"
 authors = [
-  { name="Todd M Bailey", email="tmb@baileywick.plus.com" },
+  { name="Todd M Bailey", email="tmb@baileywick.plus.com" }
 ]
 description = "Make standalone interactive HTML charts to explore time series datasets"
 license = {file = "LICENSE"}
@@ -17,15 +17,17 @@ dependencies = [
     "numpy >= 1.19.2",
     "pandas >= 1.1.5",
     "pyyaml >= 5.4.1",
+    "xlrd >= 2.0.1"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
-    'Development Status :: 3 - Alpha',
+    'Development Status :: 3 - Alpha'
 ]
 
 [project.scripts]
+xp-dashboard = "xplorts.dblprod.xpdashboard:main"
 xp-dblprod = "xplorts.dblprod.xpdblprod:main"
 xp-heatmap = "xplorts.heatmap.xpheatmap:main"
 xp-lines = "xplorts.lines.xplines:main"
@@ -41,5 +43,5 @@ xp-tscomp = "xplorts.tscomp.xptscomp:main"
 [tool.hatch.build]
 exclude = [
   "zz *",
-  "data/*.html",
+  "data/*.html"
 ]

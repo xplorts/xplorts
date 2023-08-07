@@ -17,5 +17,6 @@ Command line interface
 
 # Export names from .snapcomp.snapcomp.
 from .snapcomp import components_figure, link_widget_to_snapcomp_figure
+from .xpsnapcomp import figsnapcomp
 
-__all__ = ["components_figure", "link_widget_to_snapcomp_figure"]
+__all__ = ["components_figure", "figsnapcomp", "link_widget_to_snapcomp_figure"]
