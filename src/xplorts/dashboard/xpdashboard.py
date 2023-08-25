@@ -47,11 +47,18 @@ optional arguments:
                         arguments to pass to `prod_ts_lines`, `prod_ts_growth` and `prod_growth_snapshot`, respectively.
   -t SAVE, --save SAVE  Interactive .html to save, if different from the datafile base
   -s, --show            Show interactive .html
+
+
+Functions
+---------
+dashboard_tabs
+
+main
 """
 
 #%%
 # Bokeh imports.
-from bokeh.layouts import column, layout, row
+from bokeh.layouts import column, grid, layout, row
 from bokeh.models import TabPanel, Tabs
 from bokeh.models.widgets import Div
 from bokeh.io import save, show
@@ -163,6 +170,10 @@ def _parse_args():
 
 #%%
 
+# Height and width of main charts (levels, heatmaps)
+_FIG_HEIGHT = 600
+_FIG_WIDTH = 900
+
 def dashboard_tabs(data, *,
                    by,
                    date,
@@ -235,7 +246,12 @@ def dashboard_tabs(data, *,
                     by=by,
                     data_variables=data_variables,
                     color_map=color_map,
-                    line_dash = line_dash)
+                    line_dash = line_dash,
+                    iv_dv_args = {
+                        "height": _FIG_HEIGHT,
+                        "width": _FIG_WIDTH,
+                        }
+                    )
 
     # Calculate cumulative growth.
     growth_columns = [
@@ -256,8 +272,9 @@ def dashboard_tabs(data, *,
                 line=dv,
                 widget=split_widget,
                 iv_dv_args = {
-                    "height": 300,
-                    "width": 600,
+                    "title": "Cumulative growth",
+                    "height": _FIG_HEIGHT // 2,
+                    "width": _FIG_WIDTH,
                     },
                 color_map = color_map,
                 )
@@ -285,8 +302,9 @@ def dashboard_tabs(data, *,
         color_map=color_map,
         widget=date_widget,
         iv_dv_args = {
-            "height": 600,
-            "width": 300,
+            "title": "Period-on-period growth",
+            "height": _FIG_HEIGHT,
+            "width": _FIG_WIDTH // 3,
             })
 
     # Put level and growth charts, with widgets, on a tab.
@@ -308,7 +326,7 @@ def dashboard_tabs(data, *,
         x_widget=date_widget.handle,
         y_widget=split_widget.handle,
         title=dv + " growth",
-        figure_options=dict(width=900, height=600),
+        figure_options=dict(width=_FIG_WIDTH, height=_FIG_HEIGHT),
         )
     tab_growth = TabPanel(
         title="Growth heatmap",
@@ -325,11 +343,12 @@ def dashboard_tabs(data, *,
         x_widget=date_widget.handle,
         y_widget=split_widget.handle,
         title=dv + " cumulative growth",
-        figure_options=dict(width=900, height=600),
+        figure_options=dict(width=_FIG_WIDTH, height=_FIG_HEIGHT),
         )
     tab_cum_growth = TabPanel(
         title="Cum growth heatmap",
-        child=column([cum_growth_heatmap, fig_ts_growth, split_widget.handle]),
+        child=grid([[cum_growth_heatmap, None],
+                      [fig_ts_growth, split_widget.handle]]),
         )
 
     return {
