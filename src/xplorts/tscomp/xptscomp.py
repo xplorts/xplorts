@@ -46,6 +46,14 @@ optional arguments:
   -t SAVE, --save SAVE  Interactive .html to save, if different from the
                         datafile base
   -s, --show            Show interactive .html
+
+
+Functions
+---------
+figtscomp
+
+
+main
 """
 
 #%%
@@ -142,6 +150,39 @@ def figtscomp(data, *,
                 color_map=None,
                 iv_dv_args=dict(),
                 **kwargs):
+    """
+    New figure showing time series growth components and total by split group
+
+    Parameters
+    ----------
+    data : DataFrame
+        Data in long form, including categorical column `by` and `date`.
+    date : str
+        Name of column of date categories.
+    by : str
+        Name of column of split level categories.
+    bars : List of GrowthComponents, optional
+        Data to show as stacked bars. The default is None.
+    line : str, optional
+        Name of column to show as line representing total growth at each
+        time period. The default is None.
+    widget : Bokeh widget, optional
+        Widget selecting a level of `by`. The default is None.
+    color_map : Mapping, optional
+        Mapping of column names to colors.  Should include component names
+        if different from level names.
+    iv_dv_args : Mapping, optional
+        Keyword arguments passed to `iv_dv_figure()`.
+    kwargs : Mapping, optional
+        Keyword arguments passed to `ts_components_figure()`.
+
+    Returns
+    -------
+    fig : Bokeh Figure
+        Figure showing time series of vertical stacked bars overlaid by a
+        line, for one split level at a time.
+
+    """
 
     # Transform monthly and quarterly dates to nested categories.
     data_local = data.copy()
