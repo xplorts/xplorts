@@ -268,6 +268,8 @@ def grouped_multi_lines(
     tool_tips: list, default []
         Pre-existing tooltips to add to the hover tool in addition to the
         default tooltips.
+    kwargs: dict, optional
+        Additional keyword arguments are passed to multi_line().
     """
 
     if data_variables in (None, []):

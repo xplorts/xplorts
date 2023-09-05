@@ -104,15 +104,17 @@ Module | Description
 --- | ---
 base | Miscellaneous helper functions and classes.
 dutils | Miscellaneous data manipulation helpers.
+dashboard | Multi-tab dashboard showing levels, growth components, and growth heatmaps.
 dblprod | Modify a Bokeh Figure by adding charts to show labour productivity levels or growth components.
 ghostbokeh | Define an abstract base class to a build pseudo-subclass of a Bokeh class.
+growthcomps | Growth of time series and their contribution to growth of derived series.
 heatmap | Functions to create a heatmap of data values as a function of horizontal and vertical categorical variables.
-lines | Modify a Bokeh Figure by adding line charts to show several time series with a split factor.
-scatter | Modify a Bokeh Figure by adding scatter charts to show one or more categorical series with a split factor.
-slideselect | Defines a class combining select and slider widgets, with support for javascript linking to other objects.
-snapcomp | Modify a Bokeh Figure by adding a snapshot growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal stacked bars showing growth components, and markers showing overall growth for each stack of bars.
-stacks | Modify a Bokeh Figure by adding a horizontal or vertical stacked bar chart showing several data series with a split factor.
-tscomp | Modify a Bokeh Figure by adding a time series growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal  stacked bars showing growth components, and a line showing overall growth.
+lines | Line charts to show several time series with a split factor.
+scatter | Scatter charts to show one or more categorical series with a split factor.
+slideselect | Class combining select and slider widgets, with support for javascript linking to other objects.
+snapcomp | Snapshot growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal stacked bars showing growth components, and markers showing overall growth for each stack of bars.
+stacks | Horizontal or vertical stacked bar chart showing several data series with a split factor.
+tscomp | Growth components chart, with a categorical vertical axis showing levels of a split factor, horizontal  stacked bars showing growth components, and a line showing overall growth.
 </details>
 
 <details>
@@ -134,19 +136,19 @@ tscomp | Modify a Bokeh Figure by adding a time series growth components chart, 
     ```conda activate my_env```
 - Execute an `xplorts` module entry point
   ```
-  xp-dblprod ...
+  xp-dashboard ...
   ```
 - Or tell `python` explicitly to run an `xplorts` module
 
   ```
-  python -m xplorts.dblprod ...
+  python -m xplorts.dashboard ...
   ```
 
 ### Getting help about command line options
 
 Pass the option `-h` to any `xplorts` script to get help.  For example:
   ```
-  xp-dblprod -h
+  xp-dashboard -h
   ```
 
 Or
@@ -188,6 +190,7 @@ Or
 
 Script | Entry point | Description
 --- | --- | ---
+dashboard | xp-dashboard | Multi-tab dashboard showing levels, growth components, and growth heatmaps.</li>
 dblprod | xp-dblprod | Create a labour productivity dashboard, with three charts including: <ul><li>a lines chart showing levels of labour productivity, gross value added, and labour,</li> <li>a time series growth components chart showing cumulative growth in labour productivity, gross value added, and labour, and</li> <li>a snapshot growth components chart showing period-on-period growth in labour productivity, gross value added, and labour.</li>
 heatmap | xp-heatmap | Create a heatmap of values as a function of two categorical variables.
 lines | xp-lines | Create a line chart showing several time series with a split factor.  Widgets select one split factor category at a time.

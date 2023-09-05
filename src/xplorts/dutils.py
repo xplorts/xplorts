@@ -23,9 +23,6 @@ find_in_metadata
 growth_pct_from
     Percentage growth for a series relative to a baseline value.
 
-growth_vars
-    Calculate growth for columns in a dataframe.
-
 index_to
     Scale data by constant so a baseline value maps to a target value.
 
@@ -236,7 +233,7 @@ def growth_pct_from(data, baseline):
 
     ## Year on year growth
     df = pd.DataFrame(dict(year=[2000, 2001, 2002], jobs=[40, 50, 20]))
-    baseline = df.jobs[df.year == 2001].values[0]
+    baseline = df.jobs[df.year == 2001].values[0]  # XXX Not YoY!
     df["jobs_yoy"] = growth_pct_from(df, baseline)
 
     ## Cumulative growth for two columns
@@ -253,132 +250,6 @@ def growth_pct_from(data, baseline):
     """
 
     return (data / baseline - 1) * 100
-
-
-def growth_vars(data, columns=[], date_var=None, by=None,
-                periods=1, baseline=None):
-    """
-    Calculate growth for columns in a dataframe
-
-    Parameters
-    ----------
-    data: DataFrame
-        Dataframe including a date column and one or more columns for which
-        to calculate growth.
-
-    columns: str or list
-        Names of columns for which to calculate growth.
-
-    date_var: str, optional
-        Name of column whose values determine temporal order among data rows.
-
-    by: str, optional
-        Name of column used to determine groups for `groupby`.
-
-    periods: int, default 1
-        Lag, in number of rows, for calculating growth within time series.
-        Ignored if `baseline` is specified.
-
-    baseline: "first", numeric, Series or DataFrame
-        Value or values to calculate growth relative to.  If "first",
-        cumulative growth is calculated relative to the row with the smallest
-        value of `date_var`.  If `baseline` is not given, growth is
-        calculated within each time series.
-
-    Returns
-    -------
-    DataFrame with same index as `data`, and columns from `columns`.
-
-    Examples
-    --------
-    # Period-on-period
-    growth_vars(df, columns=["gva"], date_var="date", periods=1)
-
-    # Cumulative growth
-    growth_vars(df, columns=["gva"], date_var="date", baseline="first")
-
-    # Growth relative to single date.
-    growth_vars(df, columns=["gva"], date_var="date", baseline="2019 Q4")
-
-    # Revisions from comparable dataframe.
-    growth_vars(df, columns=["gva"], baseline=df_baseline)
-
-
-    # Growth relative to single date, with a split factor.
-    growth_vars(df, columns=["gva"], date_var="date", by="industry", baseline="2019 Q4")
-
-    # Same as:
-    baseline = data.loc[df["date"]==min(df["date"]), :].groupby("industry")["gva"].first()
-    growth_vars(df, columns=["gva"], date_var="date", baseline=baseline)
-
-
-    # Relative to calculated baseline for each level of `by`
-    baseline = data.loc[data["year"]=="2019", :].groupby("industry")["gva"].mean()
-    growth_vars(df, columns=["gva"], by="industry", baseline=baseline)
-    """
-
-    # Ensure data columns include the ones we need.
-    if date_var is not None:
-        assert date_var in data.columns
-    if by is not None:
-        assert by in data.columns
-    assert all(col in data.columns for col in columns), \
-        f"Some of {columns} are missing from data columns {data.columns}"
-
-
-    # Make placeholder copy of data ready to inject results into `columns`.
-    result = data.copy()
-    result[columns] = np.nan
-
-    # Expand baseline shortcuts ("first" or a value to match data[date_var]).
-    if baseline == "first":
-        # Put baseline at earliest date value to get cumulative growth.
-        if by is not None:
-            baseline = data.loc[data[date_var]==min(data[date_var]), :].groupby(by)[columns].first()
-        else:
-            baseline = data.loc[data[date_var]==min(data[date_var]), :]
-    elif baseline is not None and not isinstance(baseline, pd.DataFrame):
-        # Find column values from date_var == baseline.
-        df_baseline_columns = columns + [by] if by is not None else columns
-        df_baseline_raw = data.set_index(date_var).loc[baseline, df_baseline_columns]
-        if by is not None:
-            # Take mean for each of the columns at each level of `by`.
-            baseline = df_baseline_raw.groupby(by).mean()
-        else:
-            # Take mean for each of the columns.
-            baseline = df_baseline_raw.mean()
-    elif isinstance(baseline, pd.DataFrame):
-        # Expect baseline dataframe to have a value for each column, with optional `by` splits.
-        pass
-    else:
-        assert baseline is None
-
-    if isinstance(baseline, pd.DataFrame):
-        # Get relative change of data compared to baseline dataframe.
-
-        assert all(col in baseline.columns for col in columns), \
-            f"Some of {columns} are missing from baseline columns {baseline.columns}"
-
-        if by is not None and date_var not in baseline.columns:
-            # Use `by` to look up baseline rows to find baseline values for columns.
-            #  `by` dataframe should have index of `by` levels.
-            baseline_values = baseline.loc[data[by], columns].values
-        else:
-            # Align baseline to data, and compare baseline dataframe to columns.
-            join_columns = [date_var, by] if by is not None else [date_var]
-            join_keys = list(pd.MultiIndex.from_frame(data[join_columns]))
-            baseline_values = baseline.set_index(join_columns).loc[join_keys, columns].values
-
-        result[columns] = growth_pct_from(data[columns],
-                                          baseline=baseline_values)
-    else:
-        # Do period-on-period growth with each column.
-        if by is not None:
-            sorted_data = data.sort_values(date_var).groupby(by)[columns]
-        else:
-            sorted_data = data[columns].sort_values(date_var)
-        result[columns] = 100 * sorted_data.pct_change(periods=periods)
-    return result
 
 
 def index_to(data, baseline, to=100):

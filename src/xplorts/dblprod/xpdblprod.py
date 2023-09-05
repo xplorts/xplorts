@@ -56,11 +56,10 @@ optional arguments:
 
 #%%
 # Bokeh imports.
-from bokeh.layouts import column, layout, row
-from bokeh.models import TabPanel, Tabs
+from bokeh.layouts import layout
+from bokeh.models import Tabs
 from bokeh.models.widgets import Div
 from bokeh.io import save, show
-from bokeh import palettes
 
 # Other external imports.
 import argparse
@@ -68,16 +67,16 @@ from collections import defaultdict
 import pandas as pd
 from pathlib import Path
 import sys
-import textwrap
 import yaml
 
 # Internal imports.
-from ..base import (filter_widget,
-                          set_output_file, unpack_data_varnames,
-                          variables_cmap)
-from ..dutils import growth_vars
-from ..heatmap import figheatmap
-from . import figprodgrowsnap, figprodlines, figprodgrowts
+from ..base import (set_output_file, unpack_data_varnames)
+from ..dashboard import dashboard_tabs
+from ..growthcomps import GrowthComponent, SignReversedComponent
+# from ..heatmap import figheatmap
+# from ..lines import figlines
+# from ..tscomp import figtscomp
+# from ..snapcomp import figsnapcomp
 
 #%%
 
@@ -158,9 +157,6 @@ def main():
         ["date", "by", "lprod", "gva", "labour"],
         data.columns)
 
-    datevar = varnames["date"]
-    dependent_variables = [varnames[var] for var in ("lprod", "gva", "labour")]
-
     title = "xplor lprod: " + Path(args.datafile).stem
 
     # Configure output file for interactive html.
@@ -169,115 +165,27 @@ def main():
         title = title
     )
 
-    # Make palettes.
-    color_map = variables_cmap(["labour", "gva", "lprod"],
-                               palettes.Category20_3)
-
     # Convert str to float so we can plot the data.
+    dependent_variables = [varnames[var] for var in ("lprod", "gva", "labour")]
     data[dependent_variables] = data[dependent_variables].astype(float)
 
+    components = [
+        GrowthComponent(varnames["gva"]),
+        SignReversedComponent(varnames["labour"]),
+        ]
 
-    # Widget for `by`.
-    split_widget = filter_widget(data[varnames["by"]], title=varnames["by"])
-
-    # Widget for date.
-    date_widget = filter_widget(data[datevar], start_value="last")
-
-    fig_index_lines = figprodlines(
-        data,
-        varnames=varnames,
-        color_map=color_map,
-        widget=split_widget,
-        height=300, width=600,
-        **args.args["lines"])
-
-
-    # Calculate cumulative growth.
-    df_growth_cum = growth_vars(data,
-                            date_var=datevar,
-                            columns=dependent_variables,
-                            by=varnames["by"],
-                            baseline="first",
+    tabs = dashboard_tabs(data,
+                           by=varnames["by"],
+                           date=varnames["date"],
+                           dv=varnames["lprod"],
+                           components=components,
                            )
-
-    fig_ts_growth = figprodgrowts(
-        df_growth_cum,
-        varnames=varnames,
-        color_map=color_map,
-        widget=split_widget,
-        height=300, width=600,
-        **args.args["growth_series"])
-
-
-    # Calculate period-on-period growth.
-    df_growth = growth_vars(data,
-                            date_var=datevar,
-                            columns=dependent_variables,
-                            by=varnames["by"],
-                            periods=1,
-                           )
-
-    # Truncate long levels of `by`, for axis labels.
-    by_var = varnames["by"]
-    df_growth[by_var] = df_growth[by_var].apply(
-        textwrap.shorten, args=(15,), placeholder='..'
-    )
-
-    fig_growth_snapshot = figprodgrowsnap(
-        df_growth,
-        varnames=varnames,
-        color_map=color_map,
-        widget=date_widget,
-        height=600, width=300,
-        **args.args["growth_snapshot"])
-
-    # Put level and growth charts, with widgets, on a tab.
-    ts_charts = column(split_widget, fig_index_lines, fig_ts_growth)
-    snapshot = column(date_widget, fig_growth_snapshot)
-    tab_levels = TabPanel(
-        title="Levels",
-        child=layout([
-            [ts_charts, snapshot],
-            ]))
-
-
-    ## Growth heatmap tab.
-    growth_heatmap = figheatmap(
-        df_growth,
-        x=varnames["date"],
-        y=varnames["by"],
-        values=varnames["lprod"],
-        x_widget=date_widget.handle,
-        y_widget=split_widget.handle,
-        title=varnames["lprod"] + " growth",
-        figure_options=dict(width=900, height=600),
-        )
-    tab_growth = TabPanel(
-        title="Growth heatmap",
-        child=row([growth_heatmap, fig_growth_snapshot, date_widget.handle]),
-        )
-
-
-    ## Cumulative growth heatmap tab.
-    cum_growth_heatmap = figheatmap(
-        df_growth_cum,
-        x=varnames["date"],
-        y=varnames["by"],
-        values=varnames["lprod"],
-        x_widget=date_widget.handle,
-        y_widget=split_widget.handle,
-        title=varnames["lprod"] + " cumulative growth",
-        figure_options=dict(width=900, height=600),
-        )
-    tab_cum_growth = TabPanel(
-        title="Cum growth heatmap",
-        child=column([cum_growth_heatmap, fig_ts_growth, split_widget.handle]),
-        )
 
     # Make app that shows tabs of various charts.
     app = layout([
         Div(text="<h1>" + title),  # Show title as level 1 heading.
-        Tabs(tabs=[tab_levels, tab_growth, tab_cum_growth])])
+        Tabs(tabs=list(tabs.values()))
+        ])
 
     if args.show:
         show(app)  # Save file and display in web browser.
