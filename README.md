@@ -105,7 +105,7 @@ Module | Description
 base | Miscellaneous helper functions and classes.
 dutils | Miscellaneous data manipulation helpers.
 dashboard | Multi-tab dashboard showing levels, growth components, and growth heatmaps.
-dblprod | Show labour productivity levels or growth components.
+dblprod | Modify a Bokeh Figure by adding charts to show labour productivity levels or growth components.
 ghostbokeh | Define an abstract base class to a build pseudo-subclass of a Bokeh class.
 growthcomps | Growth of time series and their contribution to growth of derived series.
 heatmap | Functions to create a heatmap of data values as a function of horizontal and vertical categorical variables.
