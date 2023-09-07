@@ -66,6 +66,9 @@ Modules (exported by the package)
 base
     Miscellaneous helper functions and classes.
 
+dutils
+    Miscellaneous data manipulation helpers.
+
 ghostbokeh
     Define an abstract base class to a build pseudo-subclass of a Bokeh class.
 
@@ -111,9 +114,10 @@ utils
     xplorts charts.
 """
 
-from . import (base, dutils, ghostbokeh, heatmap,
+from . import (base, dutils, ghostbokeh,
                slideselect)
 # Export API modules within sub-packages.
+from .heatmap import heatmap
 from .lines import lines
 from .scatter import scatter
 from .snapcomp import snapcomp
