@@ -6,7 +6,7 @@ Functions
 figheatmap
     Make a heatmap figure, with color bar
 
-heatmap
+addheatmap
     Add a heatmap to a figure, with color map and hover tooltip.
 
 jscb_set_from_selection
@@ -107,6 +107,7 @@ def ts_categorical_figure(data,
     # Define categories for vertical axis.
     y_range = _simple_factor_range(source.data[y], reverse=True)
 
+    # TOOLS = "hover,tap,save,pan,box_zoom,reset,xwheel_pan,xwheel_zoom,ywheel_pan,ywheel_zoom"
     TOOLS = "hover,tap,save,pan,box_zoom,reset,wheel_zoom"
 
     if x_hover is None:
@@ -154,16 +155,17 @@ def ts_categorical_figure(data,
 #%%
 
 # Apply a color mapper.
-def _color_mapper(source, values, *, mapper=None, palette=None):
+def _color_mapper(source, values, *, mapper=None, palette=None,
+                  **kwargs):
     if palette is None:
         palette = "Viridis256"
-    if mapper is None or mapper == "linear":
-        mapper = linear_cmap
-    elif mapper == "log":
-        mapper = log_cmap
 
     data = pd.Series(source.data[values])
-    low, high = data.min(), data.max()
+    if mapper == "symmetric":
+        high = data.abs().max()
+        low = -high
+    else:
+        low, high = data.min(), data.max()
 
     # Avoid degenerate range of values.
     if low == high:
@@ -174,13 +176,20 @@ def _color_mapper(source, values, *, mapper=None, palette=None):
         else:
             high = 1  # 0..1
 
+    if mapper in [None, "linear", "symmetric"]:
+        mapper = linear_cmap
+    elif mapper == "log":
+        mapper = log_cmap
+
     color_map = mapper(values, palette,
                         low=low,
-                        high=high)
+                        high=high,
+                        nan_color=kwargs.pop("nan_color", "white"),
+                        **kwargs)
     return color_map
 
 
-def heatmap(fig,
+def addheatmap(fig,
             data,
             x,
             y,
@@ -254,6 +263,7 @@ def figheatmap(data,
             title="(untitled)",
             x_widget=None, y_widget=None,
             figure_options={},
+            bar_options={},
             **kwargs):
     """
     Make a heatmap figure, with color bar
@@ -281,6 +291,8 @@ def figheatmap(data,
         the y coordinate of the selected (tapped) cell.
     figure_options : dict, optional
         Passed as keyword arguments to bokeh.plotting.fig().
+    bar_options : dict, optional
+        Passed as keyword arguments to ColorBar().
     **kwargs
         Keyword arguments for Figure.rect().
 
@@ -316,8 +328,9 @@ def figheatmap(data,
             title=title,
             **figure_options
         )
+    fig.y_range.bounds = "auto"  # Limit pan to actual categories.
 
-    hm_rect = heatmap(
+    hm_rect = addheatmap(
             fig,
             source,
             x="_date_factor",
@@ -328,12 +341,13 @@ def figheatmap(data,
 
     color_bar = hm_rect.construct_color_bar(
         major_label_text_font_size="8px",
-        ticker=BasicTicker(#desired_num_ticks=len(palette)
-                           ),
+        # ticker=BasicTicker(#desired_num_ticks=len(palette)
+        #                    ),
         #formatter=PrintfTickFormatter(format="%d%%"),
         label_standoff=6,
         border_line_color=None,
-        padding=5
+        padding=5,
+        **bar_options,
     )
 
     fig.add_layout(color_bar, 'right')
