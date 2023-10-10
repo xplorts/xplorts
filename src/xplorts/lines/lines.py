@@ -38,7 +38,7 @@ def link_widget_to_lines(widget, renderers):
 
     The first time it is triggered the callback hides the first renderer.
     To work correctly with a different initial visible renderer other than
-    renderers[0], set the `.option_index` property of the widget to the
+    renderers[0], set the `.recent_index` property of the widget to the
     index of the initial visible renderer.
 
     Parameters
@@ -73,7 +73,7 @@ def link_widget_to_lines(widget, renderers):
 
                 // Hide currently visible glyph.
                 glyphs[this.previous_index].visible = false;
-                console.log('Made glyph ' + this.option_index + ' INvisible');
+                console.log('Made glyph ' + this.previous_index + ' INvisible');
 
                 // Show glyph currently selected by widget.
                 glyphs[option_index].visible = true;
