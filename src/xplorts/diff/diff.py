@@ -75,7 +75,6 @@ _GRAY_TICKS = [-5, -1, 0, 1, 5]
 
 #%%
 
-<<<<<<< HEAD
 class RevisedTS():
     """
     Time series dataset along with an earlier vintage
@@ -152,170 +151,6 @@ class RevisedTS():
     data = None
     date = None
     by = None
-    # levels = None
-    # indexes = None
-=======
-def compare(data, baseline=None, **kwargs):
-    """
-    Calculate percent difference of new data relative to original
-
-    Parameters
-    ----------
-    data : dict or DataFrame
-        If not a DataFrame, should be a mapping with keys "original" and "new"
-        whose values are dataframes.  The original data is ignored if
-        `baseline` is given.
-    baseline : DataFrame, optional
-        Original data to compare to. If not given, `data` should be a mapping
-        with keys "original" as well as "new".
-    **kwargs : mapping
-        Other keyword arguments are passed to `growth_vars`.
-
-    Returns
-    -------
-    result : DataFrame
-        Percent difference values.
-    """
-    data = (
-        data.copy() if isinstance(data, dict)
-        else {"new": data}
-        )
-    if baseline is not None:
-        data["original"] = baseline
-    result = growth_vars(
-        data["new"],
-        baseline=data["original"],
-        **kwargs
-        )
-    return result
-
-
-def link_widget_to_heatmaps(widget, models):
-    return link_widget_to_lines(widget, models)
-
-
-def revision_layout(
-        data,
-        *,
-        x, y, values,
-        title="Revisions",
-        palette_dict={"posneg": None, "abs": None},
-        visible=True,
-        **kwargs
-        ):
-
-    palette_posneg = (palette_dict.get("posneg", None)
-                      or RWB_PALETTE_POS_NEG)
-
-    palette_abs = (palette_dict.get("abs", None)
-                      or PALETTE_ABS_CAT_GRAY)
-
-    # Make CDS to use in both heatmaps, with different palettes.
-    source = (ColumnDataSource(data) if not isinstance(data, ColumnDataSource)
-              else data)
-
-    data_values = pd.Series(source.data[values])
-    vmin = data_values.min()
-    if pd.isna(vmin) or vmin > -5.25:
-        vmin = -5.25
-    vmax = data_values.max()
-    if pd.isna(vmax) or vmax < 5.25:
-        vmax = 5.25
-    fig_pos_neg = hm.figheatmap(
-        source,
-        x=x,
-        y=y,
-        values=values,
-        title="Revision %",
-        # palette=palette_posneg,
-        # mapper="symmetric",
-        color_map = linear_cmap(values,
-                                palette_posneg,
-                                low=min(vmin, -vmax),
-                                high=max(vmax, -vmin),
-                                nan_color=_NAN_COLOR),
-        )
-
-    fig_abs = hm.figheatmap(
-        source,
-        x=x,
-        y=y,
-        values=values,
-        title="Absolute revision %",
-        # palette=palette_abs,
-        color_map = linear_cmap(values,
-                                palette_abs,
-                                low=-5.25,
-                                high=5.25,
-                                # low_color=_GRAY_BIG_COLOR,
-                                # high_color=_GRAY_BIG_COLOR,
-                                nan_color=_NAN_COLOR),
-        bar_options={
-            "ticker": FixedTicker(ticks=_GRAY_TICKS)
-        }
-
-        # palette=PALETTE_ABS_CAT_GRAY,
-        # mapper="symmetric",
-        # high=np.sqrt(10),
-        # low=np.sqrt(10),
-        # high_color=_GRAY_BIG_COLOR,
-        )
-    return row(fig_pos_neg, fig_abs, visible=visible)
-
-
-def revtab(
-        data,
-        *,
-        x, y,
-        values,
-        title="Revisions",
-        palette_dict={"posneg": None, "abs": None},
-        **kwargs
-        ):
-
-    if isinstance(values, str):
-        # Prepare to show a single data measure.
-        widget = None
-        value_cols = [values]
-    else:
-        # Prepare to show any data measure selected by a widget.
-        widget = values
-        value_cols = widget.options
-
-    heatmaps = [
-        revision_layout(
-            data,
-            x=x,
-            y=y,
-            values=value_col,  # current column
-            palette_dict=palette_dict,
-            visible=False,  # Hide most data measures.
-            **kwargs
-        ) for value_col in value_cols]
-    heatmaps[0].visible = True  # Show first data measure.
-
-    if widget is not None:
-        # Sync widget to .visible property of data measure heatmaps.
-        link_widget_to_heatmaps(widget, heatmaps)
-
-    tab_layout = (column(widget, *heatmaps) if widget is not None
-                  else heatmaps[0])
-
-    tab = TabPanel(
-        title=title,
-        child=tab_layout)
-    return tab
-
-#%%
-
-class RevisedTS():
-    data = None
-    date = None
-    by = None
-    levels = None
-    indexes = None
->>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
-
 
     def __new__(cls, *args, **kwargs):
         if args:
@@ -383,10 +218,6 @@ class RevisedTS():
         None.
 
         """
-<<<<<<< HEAD
-=======
-
->>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         if isinstance(data, (RevisedTS, dict)):
             self.data = {
                 "new": data["new"],
@@ -426,28 +257,19 @@ class RevisedTS():
         self.by = by
 
     # Allow iteration over the parent object, delegating it to .data.
-<<<<<<< HEAD
     # `list(RevisedTS(...))` is thus the same as `list(RevisedTS(...).data)`,
     # giving `["new", "original"]`.
-=======
->>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
     def __iter__(self):
         yield from self.data
 
     @property
     def all_measures(self):
-<<<<<<< HEAD
         """All items in `.levels`, `.indexes` and `.growths`.  Read only."""
-=======
->>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         return self.levels + self.indexes + self.growths
 
     @property
     def new(self):
-<<<<<<< HEAD
         """Current vintage of time series dataset."""
-=======
->>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         return self.data["new"]
 
     @new.setter
@@ -456,24 +278,17 @@ class RevisedTS():
 
     @property
     def original(self):
-<<<<<<< HEAD
         """Previous vintage of time series dataset."""
-=======
->>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         return self.data["original"]
 
     @original.setter
     def original(self, data):
         self.data["original"] = data
 
-<<<<<<< HEAD
     ## Methods
 
     def get(self, *args):
         """Get specified vintage dataset."""
-=======
-    def get(self, *args):
->>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         return self.data.get(*args)
 
     # Allow read/write access via obj[key], like obj["new"].
@@ -484,7 +299,6 @@ class RevisedTS():
 
 
     def apply(self, fct, *args, **kwargs):
-<<<<<<< HEAD
         """
         Apply a function to each vintage dataset.
 
@@ -504,8 +318,6 @@ class RevisedTS():
         result : RevisedTS
             Transformed data for each vintage.
         """
-=======
->>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         result = RevisedTS(self)  # shallow copy
         result.__dict__.update(self.__dict__)  # copy properties
         result.data = {
@@ -516,7 +328,6 @@ class RevisedTS():
 
 
     def calc_growth(self, *args, **kwargs):
-<<<<<<< HEAD
         """
         Calculate growth rates for measures in each vintage.
 
@@ -531,8 +342,6 @@ class RevisedTS():
             Copy of original, replacing values in `.levels` and `indexes`
             columns with their corresponding growth rates.
         """
-=======
->>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         result = self.apply(
             growth_vars,
             *args,
@@ -548,7 +357,6 @@ class RevisedTS():
 
     # Calculate revisions of new data compared to original data.
     def revisions(self, **kwargs):
-<<<<<<< HEAD
         """
         Calculate revisions in new data compared to original data.
 
@@ -564,8 +372,6 @@ class RevisedTS():
         result : DataFrame
             Time series dataset, same shape as `.new`.
         """
-=======
->>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         result = growth_vars(
             self.new,
             baseline=self.original,
@@ -578,7 +384,6 @@ class RevisedTS():
 
 #%%
 
-<<<<<<< HEAD
 def link_widget_to_heatmaps(widget, models):
     """Link a widget to .visible property of heatmap layouts"""
     return link_widget_to_lines(widget, models)
@@ -759,8 +564,6 @@ def revtab(
 
 #%%
 
-=======
->>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
 
 # if __name__ == "__main__":
 if False:
@@ -801,11 +604,7 @@ if False:
         by="industry",
         )
 
-<<<<<<< HEAD
     tabs = revtab(data_rts)
-=======
-    tabs = difftabs(data_rts)
->>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
 
     # Make app that shows tabs of various charts.
     app = layout([
