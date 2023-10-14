@@ -17,7 +17,7 @@ creates an HTML document that displays an interactive line chart.
 
 Functions
 ---------
-xplines
+figlines
     Make interactive line chart of time series data with split factor
 
 Constants
@@ -130,12 +130,13 @@ DATE_THRESHOLD = 40
 
 #%%
 
-def xplines(data,
+def figlines(data, *,
+            date,
+            by,
+            data_variables,
             widget=None,
-            date=None,
-            by=None,
-            data_variables=None,
             color_map=None,
+            line_dash=None,
             iv_dv_args=dict(),
             **kwargs):
     """
@@ -145,18 +146,21 @@ def xplines(data,
     ----------
     data : DataFrame
         Including columns to be plotted, which are named in other parameters.
+    date : str
+        Name of column containing time series dates to plot along the horizontal
+        chart axis.
+    by : str
+        Name of column containing split levels.  The chart displays a single split
+        level at a time.
+    data_variables : list
+        List of column names to be plotted as time series lines.
     widget : Bokeh widget, optional
         The `value` attribute will be linked to the chart to make visible one
         value of the `by` variable.
-    date : str, optional
-        Name of column containing time series dates to plot along the horizontal
-        chart axis.
-    by : str, optional
-        Name of column containing split levels.  The chart displays a single split
-        level at a time.
-    data_variables : list, optional
-        List of three (XX ?) column names to be plotted as time series lines.  The columns
-        should be, in order, labour productivity, gross value added, and labour.
+    color_map : dict of colors, optional
+        Map data_variables to colors.
+    line_dash : list of line dash specifications, optional
+        For corresponding data_variables.
     iv_dv_args : mapping
         Keyword arguments passed to `iv_dv_figure()`.
     kwargs : mapping
@@ -194,25 +198,14 @@ def xplines(data,
                                    "Category20_20")
     palette = [color_map[var] for var in data_variables]
 
-    # Use dash for alternating line colors (but last one is always solid).
-    line_dash = ["solid"] * len(data_variables)
-    line_dash[0:-1:2] = ["dashed"] * len(data_variables[0:-1:2])
+    if line_dash is None:
+        # Use dash for alternating line colors (but last one is always solid).
+        line_dash = ["solid"] * len(data_variables)
+        line_dash[0:-1:2] = ["dashed"] * len(data_variables[0:-1:2])
 
     cds_options = {
         "color": palette,
         "line_dash": line_dash}
-
-
-    # default_args = dict(
-    #     line_alpha=0.8,
-    #     hover_line_alpha=1,
-    #     line_width=2,
-    #     hover_line_width=4,
-    #     cds_options=dict(color=default_line_colors,
-    #                      line_dash=default_line_dash),
-    #     color="color",
-    #     line_dash="line_dash"
-    # )
 
     index_lines = grouped_multi_lines(
         fig_index_lines,
@@ -265,59 +258,11 @@ def main():
     split_widget = filter_widget(data[varnames["by"]], title=varnames["by"])
 
 
-    fig = xplines(data,
-                  widget=split_widget,
-                  date=varnames["date"],
-                  by=varnames["by"],
-                  data_variables=varnames["lines"])
-
-
-    # Transform monthly and quarterly dates to nested categories.
-    # datevar = varnames["date"]
-    # data_local = data.copy()
-    # data_local["_date_factor"] = date_tuples(data_local[datevar],
-    #                                          length_threshold=DATE_THRESHOLD)
-
-    # # Prepare to suppress most quarters or months on axis if lots of them.
-    # suppress_factors = (isinstance(data_local["_date_factor"][0], tuple)
-    #                     and len(data_local["_date_factor"].unique()) > DATE_THRESHOLD)
-
-    # fig = iv_dv_figure(
-    #     iv_axis = "x",
-    #     iv_data = data_local["_date_factor"],
-    #     suppress_factors = suppress_factors,
-    #     y_axis_label = "Value"
-    # )
-
-    # default_color_map = variables_cmap(datavars,
-    #                                    "Category20_20")
-    # default_line_colors = [default_color_map[var] for var in datavars]
-
-    # # Use dash for alternating line colors within each similar pair.
-    # default_line_dash = ["solid"] * len(datavars)
-    # default_line_dash[0:-1:2] = ["dashed"] * len(datavars[0:-1:2])
-
-    # default_args = dict(
-    #     line_alpha=0.8,
-    #     hover_line_alpha=1,
-    #     line_width=2,
-    #     hover_line_width=4,
-    #     cds_options=dict(color=default_line_colors,
-    #                      line_dash=default_line_dash),
-    #     color="color",
-    #     line_dash="line_dash"
-    # )
-
-    # lines = grouped_multi_lines(
-    #     fig,
-    #     data_local,
-    #     iv_variable=dict(plot="_date_factor", hover=datevar),
-    #     data_variables=datavars,
-    #     by=varnames["by"],
-    #     **{**default_args, **args.args}
-    # )
-
-    # link_widget_to_lines(split_widget, lines)
+    fig = figlines(data,
+                    widget=split_widget,
+                    date=varnames["date"],
+                    by=varnames["by"],
+                    data_variables=datavars)
 
     # Make app that shows widget and chart.
     app = layout([
