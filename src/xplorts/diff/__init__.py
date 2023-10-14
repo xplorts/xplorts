@@ -20,9 +20,9 @@ or
 """
 
 # Export names from .diff.diff.
-from .diff import (DIFF_KEYS, RevisedTS, compare, link_widget_to_heatmaps,
+from .diff import (DIFF_KEYS, RevisedTS, link_widget_to_heatmaps,
                      revision_layout, revtab)
 from .xpdiff import difftabs
 
-__all__ = ["DIFF_KEYS", "RevisedTS", "compare", "difftabs", "link_widget_to_heatmaps",
+__all__ = ["DIFF_KEYS", "RevisedTS", "difftabs", "link_widget_to_heatmaps",
            "revision_layout", "revtab"]
