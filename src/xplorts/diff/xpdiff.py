@@ -8,27 +8,31 @@ earlier vintage of the same series.  There are tabs for revisions
 to levels, revisions to growth rates, and revisions to cumulative
 growth.
 
-    In the CSV file, the first row of data defines column names.
-    The file should include:
-        - a column of dates (annual, quarterly or monthly),
-        - a column of category names, and
-        - columns of data values (levels or indexes).
+In the CSV file, the first row of data defines column names.
+The file should include:
+    - a column of dates (annual, quarterly or monthly),
+    - a column of category names, and
+    - columns of data values (levels or indexes).
 
-    An interactive bokeh app is created, displaying three tabs.
-    Each tab shows a pair of heatmaps for revision percentages and
-    absolute revision percentages, with dates along the horizontal
-    axis, category names along the vertical axis, and a selector
-    widget to switch from one data measure to another.
+An interactive bokeh app is created, displaying three tabs.
+Each tab shows a pair of heatmaps for revision percentages and
+absolute revision percentages, with dates along the horizontal
+axis, category names along the vertical axis, and a selector
+widget to switch from one data measure to another.
 
-    The interactive app is saved as an HTML file which requires
-    a web browser to view, but does not need an active internet connection.
-    Once created, the HTML file does not require Python,
-    so it is easy to share the interactive app.
+The interactive app is saved as an HTML file which requires
+a web browser to view, but does not need an active internet connection.
+Once created, the HTML file does not require Python,
+so it is easy to share the interactive app.
 
 Command line interface
 ----------------------
-usage: xp-diff [-h] [-x DATE] [-y BY] [-z VALUES] [-g ARGS] [-t SAVE] [-s] datafile
-usage: python -m xplorts.diff [-h] ...
+usage: xp-diff [OPTION ...] datafile
+usage: python -m xplorts.diff [OPTION ...] datafile
+
+where OPTION is any combination of:
+    [-h] [-x DATE] [-y BY] [-z VALUES] [-g ARGS] [-t SAVE] [-s]
+
 
 Create interactive heatmap for time series data with a split factor
 
@@ -50,41 +54,51 @@ optional arguments:
 
 from bokeh.io import save, show
 from bokeh.layouts import layout
-from bokeh.models import ColumnDataSource, Div, TabPanel, Tabs
+from bokeh.models import ColumnDataSource, Div, Tabs
 
 import argparse
 from pathlib import Path
 import pandas as pd
 import sys
-#import yaml
 
 from xplorts.base import filter_widget, set_output_file, unpack_data_varnames
 from xplorts.diff import RevisedTS, revtab
 
 #%%
 
-def difftabs(
-        data,
-    ):
+def difftabs(data):
+    """
+    Return Bokeh Tabs object with three revision tabs
 
-    growths = data.calc_growth(periods=1)
-    cumgrowths = data.calc_growth(baseline="first")
+    Parameters
+    ----------
+    data : RevisedTS
+        Time series dataset with two vintages.
+
+    Returns
+    -------
+    Tabs
+        Includes a tab for level revisions, growth revisions, and revisions
+        in cumulative growth.
+    """
+    # Widget for selecting which measure to show.
+    widget = filter_widget(data.all_measures, title="Measure")
 
     cds_diff_levels = ColumnDataSource(
         data.revisions()
     )
 
     cds_diff_growth = ColumnDataSource(
-        growths.revisions(method="diff")
+        data
+            .calc_growth(baseline="first")
+            .revisions(method="diff")
     )
 
     cds_diff_cumgrowth = ColumnDataSource(
-        cumgrowths.revisions(method="diff")
+        data
+            .calc_growth(baseline="first")
+            .revisions(method="diff")
     )
-
-
-    # Widget for selecting which measure to show.
-    widget = filter_widget(data.all_measures, title="Measure")
 
     tabs = [
         revtab(revdata, title=revtitle,
