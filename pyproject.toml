@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "xplorts"
-version = "0.91"
+version = "1.0"
 authors = [
   { name="Todd M Bailey", email="tmb@baileywick.plus.com" }
 ]
@@ -29,6 +29,7 @@ classifiers = [
 [project.scripts]
 xp-dashboard = "xplorts.dashboard.xpdashboard:main"
 xp-dblprod = "xplorts.dblprod.xpdblprod:main"
+xp-diff = "xplorts.diff.xpdiff:main"
 xp-heatmap = "xplorts.heatmap.xpheatmap:main"
 xp-lines = "xplorts.lines.xplines:main"
 xp-scatter = "xplorts.scatter.xpscatter:main"
