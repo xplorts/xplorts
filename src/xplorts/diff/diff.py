@@ -75,6 +75,86 @@ _GRAY_TICKS = [-5, -1, 0, 1, 5]
 
 #%%
 
+<<<<<<< HEAD
+class RevisedTS():
+    """
+    Time series dataset along with an earlier vintage
+
+    The vintage `new` represents current values for all time periods.  The
+    vintage `ogirinal` represeents a snapshot of previous values for all
+    time periods that were available then.
+
+    One of the two vintages can be accessed directly through an instance
+    `revts` in several ways:
+        # As an instance property
+        revts.new  # DataFrame, current values for all time periods
+        revts.original  # DataFrame, earlier values for all time periods
+
+        # As a key-value mapping
+        revts[vintage]  # For vintage in ["new", "original"]
+
+        # Via `.get()`
+        revts.get(vintage, default)  # For vintage in ["new", "original"]
+
+    Instances are iterable, yielding a sequence of vintage names
+    ["new", "original"].
+
+    Methods
+    -------
+    apply()
+        Apply a function to each vintage dataset.
+
+    calc_growth()
+        Calculate growth rates for measures in each vintage.
+
+    get()
+        Get specified vintage dataset.
+
+    revisions()
+        Calculate revisions in new data compared to original data.
+
+
+    Instance attributes
+    -------------------
+    all_measures: [str, ...]
+        Includes all of `.levels`, `.indexes` and `.growths`.  Read only.
+
+    by: str, [str, ...]
+        Columns representing categorical split levels.  A well-formed time
+        series dataset will have at most one row for each `date` value for
+        each combination of `by` values.
+
+    data: dict
+        Maps vintage keys "new" and "original" to dataframes.
+
+    date: str
+        Name of dataframe column representing time periods.
+
+    growths: [str, ...]
+        Columns representing growth series (?).
+
+    indexes: [str, ...]
+        Columns representing index series that allow meaningful assessment of
+        growth rates from one time period to another, but not comparison of
+        relative revisions across vintages.
+
+    levels: [str, ...]
+        Columns representing measurement quantities that allow meaningful
+        comparison of relative revisions across vintages--generally not
+        index series or growths.
+
+    new: DataFrame, None
+        Current vintage of time series dataset.
+
+    original: DataFrame, None
+        Previous vintage of time series dataset.
+    """
+    data = None
+    date = None
+    by = None
+    # levels = None
+    # indexes = None
+=======
 def compare(data, baseline=None, **kwargs):
     """
     Calculate percent difference of new data relative to original
@@ -234,6 +314,7 @@ class RevisedTS():
     by = None
     levels = None
     indexes = None
+>>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
 
 
     def __new__(cls, *args, **kwargs):
@@ -302,7 +383,10 @@ class RevisedTS():
         None.
 
         """
+<<<<<<< HEAD
+=======
 
+>>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         if isinstance(data, (RevisedTS, dict)):
             self.data = {
                 "new": data["new"],
@@ -342,15 +426,28 @@ class RevisedTS():
         self.by = by
 
     # Allow iteration over the parent object, delegating it to .data.
+<<<<<<< HEAD
+    # `list(RevisedTS(...))` is thus the same as `list(RevisedTS(...).data)`,
+    # giving `["new", "original"]`.
+=======
+>>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
     def __iter__(self):
         yield from self.data
 
     @property
     def all_measures(self):
+<<<<<<< HEAD
+        """All items in `.levels`, `.indexes` and `.growths`.  Read only."""
+=======
+>>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         return self.levels + self.indexes + self.growths
 
     @property
     def new(self):
+<<<<<<< HEAD
+        """Current vintage of time series dataset."""
+=======
+>>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         return self.data["new"]
 
     @new.setter
@@ -359,13 +456,24 @@ class RevisedTS():
 
     @property
     def original(self):
+<<<<<<< HEAD
+        """Previous vintage of time series dataset."""
+=======
+>>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         return self.data["original"]
 
     @original.setter
     def original(self, data):
         self.data["original"] = data
 
+<<<<<<< HEAD
+    ## Methods
+
     def get(self, *args):
+        """Get specified vintage dataset."""
+=======
+    def get(self, *args):
+>>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         return self.data.get(*args)
 
     # Allow read/write access via obj[key], like obj["new"].
@@ -376,6 +484,28 @@ class RevisedTS():
 
 
     def apply(self, fct, *args, **kwargs):
+<<<<<<< HEAD
+        """
+        Apply a function to each vintage dataset.
+
+        Parameters
+        ----------
+        fct : callable
+            Function to apply.  Will be called as `fct(data, *args, **kwargs)`
+            for each `data` from `self.new` and `self.original`.  Should
+            return a DataFrame the same shape as `data`.
+        *args
+            Additional positional arguments.
+        **kwargs
+            Keyword arguments passed to `fct`.
+
+        Returns
+        -------
+        result : RevisedTS
+            Transformed data for each vintage.
+        """
+=======
+>>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         result = RevisedTS(self)  # shallow copy
         result.__dict__.update(self.__dict__)  # copy properties
         result.data = {
@@ -386,6 +516,23 @@ class RevisedTS():
 
 
     def calc_growth(self, *args, **kwargs):
+<<<<<<< HEAD
+        """
+        Calculate growth rates for measures in each vintage.
+
+        Parameters
+        ----------
+        *args, **kwargs
+            Passed to `growth_vars()` along with each vintage dataset.
+
+        Returns
+        -------
+        result : RevisedTS
+            Copy of original, replacing values in `.levels` and `indexes`
+            columns with their corresponding growth rates.
+        """
+=======
+>>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         result = self.apply(
             growth_vars,
             *args,
@@ -401,6 +548,24 @@ class RevisedTS():
 
     # Calculate revisions of new data compared to original data.
     def revisions(self, **kwargs):
+<<<<<<< HEAD
+        """
+        Calculate revisions in new data compared to original data.
+
+        Compares columns in `.levels` and `.growths`, but not `.indexes`.
+
+        Parameters
+        ----------
+        **kwargs
+            Keyword arguments passed to `growth_vars()`.
+
+        Returns
+        -------
+        result : DataFrame
+            Time series dataset, same shape as `.new`.
+        """
+=======
+>>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
         result = growth_vars(
             self.new,
             baseline=self.original,
@@ -413,6 +578,189 @@ class RevisedTS():
 
 #%%
 
+<<<<<<< HEAD
+def link_widget_to_heatmaps(widget, models):
+    """Link a widget to .visible property of heatmap layouts"""
+    return link_widget_to_lines(widget, models)
+
+
+def revision_layout(
+        data,
+        *,
+        x, y, values,
+        title="Revisions",
+        palette_dict={"posneg": None, "abs": None},
+        visible=True,
+        **kwargs
+        ):
+    """
+    Row of two heatmaps showing signed revisions and absolute revisions.
+
+    Parameters
+    ----------
+    data : DataFrame or ColumnDataSource
+        Dataset of revision statistics.
+    x : str
+        Name of categorical column for horizontal heatmap axis.
+    y : str
+        Name of categorical column for vertical heatmap axis.
+    values : str
+        Name of quantitative column mapped to heatmap colour.
+    title : str, optional
+        Text to display above heatmaps. The default is "Revisions".
+    palette_dict : dict, optional
+        Override default color palettes.  If the key "posneg" is included, its
+        value overrides the default palette for signed revisions.  If the key
+        "abs" is included, its value overrides the default palette for
+        absolute revisions.
+    visible : bool, optional
+        Make the layout visible. The default is True.  Used with widgets to
+        interactively switch between heatmaps for different measures in a
+        dataset.
+    **kwargs
+        Keyword arguments passed to `figheatmap()`.
+
+    Returns
+    -------
+    Bokeh layout
+        Visible or invisible row of two heatmaps that use a single
+        ColumnDataSource.
+    """
+    palette_posneg = (palette_dict.get("posneg", None)
+                      or RWB_PALETTE_POS_NEG)
+
+    palette_abs = (palette_dict.get("abs", None)
+                      or PALETTE_ABS_CAT_GRAY)
+
+    # Make CDS to use in both heatmaps, with different palettes.
+    source = (ColumnDataSource(data) if not isinstance(data, ColumnDataSource)
+              else data)
+
+    data_values = pd.Series(source.data[values])
+    vmin = data_values.min()
+    if pd.isna(vmin) or vmin > -5.25:
+        vmin = -5.25
+    vmax = data_values.max()
+    if pd.isna(vmax) or vmax < 5.25:
+        vmax = 5.25
+    fig_pos_neg = hm.figheatmap(
+        source,
+        x=x,
+        y=y,
+        values=values,
+        title="Revision %",
+        # palette=palette_posneg,
+        # mapper="symmetric",
+        color_map = linear_cmap(values,
+                                palette_posneg,
+                                low=min(vmin, -vmax),
+                                high=max(vmax, -vmin),
+                                nan_color=_NAN_COLOR),
+        )
+
+    fig_abs = hm.figheatmap(
+        source,
+        x=x,
+        y=y,
+        values=values,
+        title="Absolute revision %",
+        # palette=palette_abs,
+        color_map = linear_cmap(values,
+                                palette_abs,
+                                low=-5.25,
+                                high=5.25,
+                                # low_color=_GRAY_BIG_COLOR,
+                                # high_color=_GRAY_BIG_COLOR,
+                                nan_color=_NAN_COLOR),
+        bar_options={
+            "ticker": FixedTicker(ticks=_GRAY_TICKS)
+        }
+
+        # palette=PALETTE_ABS_CAT_GRAY,
+        # mapper="symmetric",
+        # high=np.sqrt(10),
+        # low=np.sqrt(10),
+        # high_color=_GRAY_BIG_COLOR,
+        )
+    return row(fig_pos_neg, fig_abs, visible=visible)
+
+
+def revtab(
+        data,
+        *,
+        x, y,
+        values,
+        title="Revisions",
+        palette_dict={"posneg": None, "abs": None},
+        **kwargs
+        ):
+    """
+    Bokeh tab showing interactive revision heatmaps
+
+    Parameters
+    ----------
+    data : DataFrame, ColumnDataSource
+        Revision statistics.
+    x : str
+        Name of categorical column for horizontal heatmap axis.
+    y : str
+        Name of categorical column for vertical heatmap axis.
+    values : str, widget
+        Name of quantitative column to show using heatmap colours.  If a
+        widget is given, heatmaps are created for each of its options,
+        using the widget to select a single option at a time to be visible.
+    title : str, optional
+        Tab name to display. The default is "Revisions".
+    palette_dict : dict, optional
+        Override default color palettes.  If the key "posneg" is included, its
+        value overrides the default palette for signed revisions.  If the key
+        "abs" is included, its value overrides the default palette for
+        absolute revisions.
+    **kwargs
+        Keyword arguments passed to `revision_layout()`.
+
+    Returns
+    -------
+    tab : Bokeh TabPanel
+        Shows revision heatmaps for one measure at a time.
+    """
+    if isinstance(values, str):
+        # Prepare to show a single data measure.
+        widget = None
+        value_cols = [values]
+    else:
+        # Prepare to show any data measure selected by a widget.
+        widget = values
+        value_cols = widget.options
+
+    heatmaps = [
+        revision_layout(
+            data,
+            x=x,
+            y=y,
+            values=value_col,  # current column
+            palette_dict=palette_dict,
+            visible=False,  # Hide most data measures.
+            **kwargs
+        ) for value_col in value_cols]
+    heatmaps[0].visible = True  # Show first data measure.
+
+    if widget is not None:
+        # Sync widget to .visible property of data measure heatmaps.
+        link_widget_to_heatmaps(widget, heatmaps)
+
+    tab_layout = (column(widget, *heatmaps) if widget is not None
+                  else heatmaps[0])
+
+    tab = TabPanel(
+        title=title,
+        child=tab_layout)
+    return tab
+
+#%%
+
+=======
+>>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
 
 # if __name__ == "__main__":
 if False:
@@ -453,7 +801,11 @@ if False:
         by="industry",
         )
 
+<<<<<<< HEAD
+    tabs = revtab(data_rts)
+=======
     tabs = difftabs(data_rts)
+>>>>>>> 384b41ca42d77a11a5c45d28362cea048f0cf411
 
     # Make app that shows tabs of various charts.
     app = layout([
