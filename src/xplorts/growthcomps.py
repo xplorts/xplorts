@@ -25,7 +25,8 @@ growth_vars
 import numpy as np
 import pandas as pd
 
-from xplorts.dutils import growth_pct_from
+#from xplorts.dutils import growth_pct_from
+from xplorts import dutils
 
 #%%
 
@@ -141,21 +142,22 @@ class SignReversedComponent(GrowthComponent):
 #%%
 
 # Compare dataframe columns to another dataframe.
-def _df_pct_diff(data, other, columns):
+def _df_compare(data, other, columns, *, method):
     # Copy original dataframe with nan in `columns`.
     result = data.assign(**{var: np.nan for var in columns})
-    # Fill `columns` with percent difference.
-    result[columns] = growth_pct_from(
+    # Fill `columns` with result of comparison.
+    result[columns] = dutils.compare(
         data[columns],
-        other[columns])
+        other[columns],
+        method=method)
     return result
 
-#
-def _df_weighted_diff(data, other, columns=None):
+# Compare dataframe columns, which may be given as Component objects.
+def _df_weighted_diff(data, other, columns=None, *, method):
     if columns is None:
         columns = data.columns
     column_names = [getattr(col, "name", col) for col in columns]
-    result = _df_pct_diff(data, other, column_names)
+    result = _df_compare(data, other, column_names, method=method)
 
     # Scale growth components by cweight.
     components = [col for col in columns if isinstance(col, GrowthComponent)]
@@ -174,7 +176,7 @@ def _df_weighted_diff(data, other, columns=None):
 #%%
 
 def growth_vars(data, columns=[], date_var=None, by=None,
-                periods=1, baseline=None):
+                periods=1, baseline=None, method="relpct"):
     """
     Calculate growth for columns in a dataframe
 
@@ -204,6 +206,8 @@ def growth_vars(data, columns=[], date_var=None, by=None,
         calculated within each time series.  If a DataFrame, revisions are
         calculated comparing `data` to `baseline`; columns of `baseline`
         should include `columns`, and may or may not include `by`.
+    method: str, default "relpct"
+        Comparison method, passed to `dutils.compare()`.
 
     Returns
     -------
@@ -268,16 +272,27 @@ def growth_vars(data, columns=[], date_var=None, by=None,
     if baseline is None:
         # Period-on-period growth.
         if date_var is not None:
-            # Sort the data.
-            sort_keys = date_var if by is None else [by, date_var]
-            data = data.sort_values(sort_keys)
-        if by is not None:
-            # Group the data.
-            df_baseline = data.groupby(by).shift(periods=periods)
-        else:
+            data = data.sort_values(date_var, kind="stable", ignore_index=True)
+
+        if by is None:
             df_baseline = data.shift(periods=periods)
+        else:
+            df_baseline = data.groupby(by, sort=False).shift(periods=periods)
+
+        # if date_var is not None:
+        #     # Sort the data (ideally would sort by date but not by `by`).
+        #     sort_keys = date_var if by is None else [by, date_var]
+        #     data = data.sort_values(sort_keys)
+
+        # if by is not None:
+        #     # Group the data.
+        #     df_baseline = data.groupby(by, sort=False).shift(periods=periods)
+        # else:
+        #     df_baseline = data.sort_values(date_var).shift(periods=periods)
+
         result = _df_weighted_diff(data, df_baseline,
-                                   columns=columns)
+                                   columns=columns,
+                                   method=method)
     elif isinstance(baseline, pd.DataFrame):
         # Revision percent.
         id_vars = [var for var in [by, date_var] if var is not None]
@@ -285,7 +300,8 @@ def growth_vars(data, columns=[], date_var=None, by=None,
             data = data.set_index(id_vars)
             baseline = baseline.set_index(id_vars)
         result = _df_weighted_diff(data, baseline,
-                                   columns=columns)
+                                   columns=columns,
+                                   method=method)
         if id_vars != []:
             result.reset_index(inplace=True)
     else:
@@ -313,7 +329,8 @@ def growth_vars(data, columns=[], date_var=None, by=None,
             raise NotImplementedError(
                 "Cumulative growth without `by` is not implemented")
         result = _df_weighted_diff(data, df_baseline,
-                                   columns=columns)
+                                   columns=columns,
+                                   method=method)
     return result
 
 

@@ -4,7 +4,7 @@
 
 # Explore time series datasets
 
-**`xplorts`** ("explore-ts") is a collection of Python tools to make standalone HTML documents containing interactive charts.  It is particularly aimed at showing time series data (hence the "ts") with annual, quarterly or monthly periodicity, such as that published by national statistical institutes by way of national accounts, productivity, or labour markets series.
+**`xplorts`** ("explore-tee-ess") is a collection of Python tools to make standalone HTML documents containing interactive charts.  It is particularly aimed at showing time series data (hence the "ts") with annual, quarterly or monthly periodicity, such as that published by national statistical institutes by way of national accounts, productivity, or labour markets series.
 
 Once created, the HTML documents can be used with any web browser.  They do not need an
 active internet connection.
@@ -19,7 +19,7 @@ active internet connection.
 pip install xplorts
 ```
 
-For `xplorts.utils.ukons_lprod_to_csv`, you also need `openpyxl`:
+For `xplorts.utils.ukons_lprod_to_csv` etc., you also need `openpyxl`:
 ```
 pip install openpyxl
 ```
@@ -103,6 +103,7 @@ xplorts.slideselect?
 Module | Description
 --- | ---
 base | Miscellaneous helper functions and classes.
+diff | Multi-tab revisions display for two vintages of a dataset.
 dutils | Miscellaneous data manipulation helpers.
 dashboard | Multi-tab dashboard showing levels, growth components, and growth heatmaps.
 dblprod | Modify a Bokeh Figure by adding charts to show labour productivity levels or growth components.
@@ -190,8 +191,9 @@ Or
 
 Script | Entry point | Description
 --- | --- | ---
-dashboard | xp-dashboard | Multi-tab dashboard showing levels, growth components, and growth heatmaps.</li>
+dashboard | xp-dashboard | Multi-tab dashboard showing levels, growth components, and growth heatmaps.
 dblprod | xp-dblprod | Create a labour productivity dashboard, with three charts including: <ul><li>a lines chart showing levels of labour productivity, gross value added, and labour,</li> <li>a time series growth components chart showing cumulative growth in labour productivity, gross value added, and labour, and</li> <li>a snapshot growth components chart showing period-on-period growth in labour productivity, gross value added, and labour.</li>
+diff | xp-diff Multi-tab revisions display for two vintages of a dataset, showing revisions in levels, growths, and cumulative growth.
 heatmap | xp-heatmap | Create a heatmap of values as a function of two categorical variables.
 lines | xp-lines | Create a line chart showing several time series with a split factor.  Widgets select one split factor category at a time.
 scatter | xp-scatter | Create scatter chart showing one or more time series with a split factor.  Widgets select one split factor category at a time.

@@ -40,6 +40,7 @@ from itertools import cycle, tee
 import numpy as np
 import pandas as pd
 import re
+import warnings
 
 try:
     from itertools import pairwise
@@ -208,6 +209,70 @@ def find_in_metadata(items, metadata, /):
     return item
 
 
+def compare(data, baseline, method="relpct"):
+    """
+    Percentage growth relative to baseline value
+
+    Parameters
+    ----------
+    data: numeric, Series or DataFrame
+        Data for which to calculate growth
+
+    baseline: numeric, Series or DataFrame
+        Value or values to calculate growth relative to.
+
+    method: "relpct", "ratio", "diff", "logpct"
+        Comparison method, one of:
+            "relpct"
+                Relative percent, calculated as `(data / baseline - 1) * 100`
+                which is often written as `100 * (data - baseline)/baseline`.
+            "ratio"
+                Calculated as `data / baseline`.
+            "diff"
+                Calculated as `data - baseline`.
+            "logpct"
+                Log percent, calculated as `ln(data / baseline) * 100`.
+                For relative differences less than about plus or minus 5%,
+                log percent values are close to simple percentage differences.
+                Unlike simple percentage difference growth rates, log percent
+                growth rates can be summed or averaged across time periods.
+
+    Returns
+    -------
+    Same shape as `data`, calculated.
+
+    Examples
+    --------
+    ## Single value
+    growth_pct_from(110, 100)
+    # 10
+
+    ## Cumulative growth for two columns
+    df = pd.DataFrame(dict(
+        year=[2000, 2001, 2002],
+        jobs=[40, 50, 20],
+        gva=[200, 250, 275]))
+    baseline = df.loc[df.year == df.year.min(),
+                      ("jobs", "gva")].reindex(index=df.index,
+                                               method="nearest")
+    df[["jobs_growth", "gva_growth"]] = growth_pct_from(df[["jobs", "gva"]],
+                                                        baseline)
+    df
+    """
+
+    if method == "relpct":
+        result = (data / baseline - 1) * 100
+    elif method == "logpct":
+        result = np.log(data / baseline) * 100
+    elif method == "ratio":
+        result = data / baseline
+    elif method == "diff":
+        result = data - baseline
+    else:
+        raise ValueError(f"Expected 'relpct', 'logpct', 'ratio' or 'diff', not '{method}'")
+    return result
+
+
 def growth_pct_from(data, baseline):
     """
     Percentage growth relative to baseline value
@@ -249,6 +314,7 @@ def growth_pct_from(data, baseline):
     df
     """
 
+    warnings.warn(DeprecationWarning("Use compare() instead of growth_pct_from()"))
     return (data / baseline - 1) * 100
 
 
