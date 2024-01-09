@@ -27,27 +27,30 @@ so it is easy to share the interactive app.
 
 Command line interface
 ----------------------
-usage: xp-diff [OPTION ...] datafile
-usage: python -m xplorts.diff [OPTION ...] datafile
+usage: xp-diff [-h] [-l LEVELS [LEVELS ...]]
+                    [-i INDEXES [INDEXES ...]] [-b BY] [-d DATE]
+                    [-t SAVE] [-s]
+                    from-file to-file
 
-where OPTION is any combination of:
-    [-h] [-x DATE] [-y BY] [-z VALUES] [-g ARGS] [-t SAVE] [-s]
-
-
-Create interactive heatmap for time series data with a split factor
+Make a standalone app showing interactive revision heatmaps in a web browser
 
 positional arguments:
-  datafile              File (CSV) with data series and split factor
+  from-file             File (CSV) with original data series and split factor
+  to-file               File (CSV) with newer data
 
 optional arguments:
   -h, --help            show this help message and exit
-  -x DATE, --date DATE  Name of categorical variable for horizontal axis
-  -y BY, --by BY        Name of categorical split variable for vertical axis
-  -z VALUES, --values VALUES
-                        Name of numeric variable to show as heatmap color
-  -g ARGS, --args ARGS  Keyword arguments for figheatmap(), as a YAML mapping.
-  -t SAVE, --save SAVE  Interactive .html to save, if different from the datafile base
+  -l LEVELS [LEVELS ...], --levels LEVELS [LEVELS ...]
+                        Variables of levels data
+  -i INDEXES [INDEXES ...], --indexes INDEXES [INDEXES ...]
+                        Variables of index data (will show growth revisions
+                        only)
+  -b BY, --by BY        Factor variable for splits
+  -d DATE, --date DATE  Date variable
+  -t SAVE, --save SAVE  Interactive .html to save, if different from the
+                        datafile base
   -s, --show            Show interactive .html
+
 """
 
 #%%
@@ -82,7 +85,9 @@ def difftabs(data):
         in cumulative growth.
     """
     # Widget for selecting which measure to show.
-    widget = filter_widget(data.all_measures, title="Measure")
+    widget = (filter_widget(data.all_measures, title="Measure")
+              if len(data.all_measures) > 1
+              else None)
 
     cds_diff_levels = ColumnDataSource(
         data.revisions()
@@ -90,7 +95,7 @@ def difftabs(data):
 
     cds_diff_growth = ColumnDataSource(
         data
-            .calc_growth(baseline="first")
+            .calc_growth()
             .revisions(method="diff")
     )
 
@@ -102,7 +107,8 @@ def difftabs(data):
 
     tabs = [
         revtab(revdata, title=revtitle,
-               x=data.date, y=data.by, values=widget,
+               x=data.date, y=data.by,
+               values=(widget if widget is not None else data.all_measures[0]),
                )
         for revdata, revtitle in [
                 (cds_diff_levels, "Level revisions"),
