@@ -80,7 +80,7 @@ class RevisedTS():
     Time series dataset along with an earlier vintage
 
     The vintage `new` represents current values for all time periods.  The
-    vintage `ogirinal` represeents a snapshot of previous values for all
+    vintage `original` represeents a snapshot of previous values for all
     time periods that were available then.
 
     One of the two vintages can be accessed directly through an instance
