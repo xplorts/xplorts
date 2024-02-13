@@ -222,17 +222,17 @@ def growth_vars(data, columns=[], date_var=None, by=None,
     growth_vars(df, columns=["gva"], date_var="date", baseline="first")
 
     # Growth relative to single date.
-    growth_vars(df, columns=["gva"], date_var="date", baseline="2019 Q4")
+    growth_vars(df, columns=["gva"], date_var="date", baseline={"date": "2019 Q4"})
 
     # Revisions from comparable dataframe.
     growth_vars(df, columns=["gva"], baseline=df_baseline)
 
 
     # Growth relative to single date, with a split factor.
-    growth_vars(df, columns=["gva"], date_var="date", by="industry", baseline="2019 Q4")
+    growth_vars(df, columns=["gva"], date_var="date", by="industry", baseline={"date": "2019 Q4"})
 
     # Same as:
-    baseline = data.loc[df["date"]==min(df["date"]), :].groupby("industry")["gva"].first()
+    baseline = data.loc[df["date"]=="2019 Q4", :].groupby("industry")["gva"].first()
     growth_vars(df, columns=["gva"], date_var="date", baseline=baseline)
 
 
@@ -304,17 +304,30 @@ def growth_vars(data, columns=[], date_var=None, by=None,
                                    method=method)
         if id_vars != []:
             result.reset_index(inplace=True)
-    else:
-        # Cumulative growth - require "first", dict, or series to find data.
-        if isinstance(baseline, str):
+    elif isinstance(baseline, str):
+            # Cumulative growth relative to first value in each split group.
             assert(baseline == "first")
-            baseline = {date_var: data[date_var].min()}
-
+            if by is None:
+                baseline = data[columns].apply(
+                    lambda c: c.loc[c.first_valid_index()])
+                df_baseline = data.assign(**baseline.to_dict())
+            else:
+                baseline = data.groupby(by)[columns].first()
+                df_baseline = (
+                    data.drop(columns=columns)
+                    .join(baseline, on=by))
+            result = _df_weighted_diff(
+                data,
+                df_baseline,
+                columns=columns,
+                method=method)
+    else:
+        # Growth relative to column values - require dict, or series to find data.
         if isinstance(baseline, dict):
             baseline = pd.Series(baseline)
 
         assert isinstance(baseline, pd.Series), \
-               f"Expected 'first', dict, or Series, not {type(baseline)}"
+               f"Expected dict, or Series, not {type(baseline)}"
         baseline_df_alignment = data.align(baseline,
                                            axis=1,
                                            join="inner",
