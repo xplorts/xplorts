@@ -308,13 +308,13 @@ def growth_vars(data, columns=[], date_var=None, by=None,
             # Cumulative growth relative to first value in each split group.
             assert(baseline == "first")
             if by is None:
-                baseline = data[columns].apply(
+                baseline = data[column_names].apply(
                     lambda c: c.loc[c.first_valid_index()])
                 df_baseline = data.assign(**baseline.to_dict())
             else:
-                baseline = data.groupby(by)[columns].first()
+                baseline = data.groupby(by)[column_names].first()
                 df_baseline = (
-                    data.drop(columns=columns)
+                    data.drop(columns=column_names)
                     .join(baseline, on=by))
             result = _df_weighted_diff(
                 data,
